@@ -1,0 +1,17 @@
+[Unit]
+Description=Matrix <-> Xmpp bridge
+Documentation=https://github.com/ma1uta/saimaa
+After=network.target postgresql.service
+AssertPathExists=/home/saimaa
+
+[Service]
+User=saimaa
+WorkingDirectory=/home/saimaa
+ExecStart=/usr/bin/java -Xmx300m -jar saimaa.jar -f saimaa.yml
+Restart=on-failure
+SuccessExitStatus=143
+ProtectSystem=strict
+ReadWritePaths=/home/saimaa
+
+[Install]
+WantedBy=multi-user.target

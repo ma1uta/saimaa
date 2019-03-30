@@ -1,0 +1,18 @@
+### Registration part ###
+id: "saimaa"
+url: "http://localhost:8888"
+as_token: 'as_token'
+hs_token: 'hs_token'
+sender_localpart: '_xmpp_master'
+namespaces:
+  users:
+    - exclusive: true
+      regex: '@_xmpp_*'
+    - exclusive: true
+      regex: '@_activitypub_*'
+  rooms: []
+  aliases:
+    - exclusive: false
+      regex: '#_xmpp_*'
+    - exclusive: false
+      regex: '#_activitypub_*'
