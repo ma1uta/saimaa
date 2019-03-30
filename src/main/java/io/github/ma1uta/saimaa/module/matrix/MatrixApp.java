@@ -14,33 +14,27 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
+package io.github.ma1uta.saimaa.module.matrix;
 
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
 
 /**
- * Module.
+ * Matrix JAX-RS application.
  */
-public interface Module extends AutoCloseable {
+@ApplicationPath("")
+public class MatrixApp extends Application {
 
-    /**
-     * Module name.
-     *
-     * @return module name.
-     */
-    String getName();
+    private final Set<Object> resources = new HashSet<>();
 
-    /**
-     * Initialize module.
-     *
-     * @param config configuration.
-     * @param bridge bridge.
-     * @throws Exception when initialization was failed.
-     */
-    void init(Map config, Bridge bridge) throws Exception;
+    public MatrixApp(Set<Object> resources) {
+        this.resources.addAll(resources);
+    }
 
-    /**
-     * Run module.
-     */
-    void run();
+    @Override
+    public Set<Object> getSingletons() {
+        return resources;
+    }
 }

@@ -14,33 +14,21 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
+package io.github.ma1uta.saimaa.module.matrix.converter;
 
-import java.util.Map;
+import io.github.ma1uta.matrix.event.RoomMessage;
+import rocks.xmpp.addr.Jid;
+import rocks.xmpp.core.stanza.model.Message;
+
+import java.util.function.BiFunction;
 
 /**
- * Module.
+ * Convert Matrix text message to the XMPP message.
  */
-public interface Module extends AutoCloseable {
+public class TextConverter implements BiFunction<Jid, RoomMessage<?>, Message> {
 
-    /**
-     * Module name.
-     *
-     * @return module name.
-     */
-    String getName();
-
-    /**
-     * Initialize module.
-     *
-     * @param config configuration.
-     * @param bridge bridge.
-     * @throws Exception when initialization was failed.
-     */
-    void init(Map config, Bridge bridge) throws Exception;
-
-    /**
-     * Run module.
-     */
-    void run();
+    @Override
+    public Message apply(Jid jid, RoomMessage<?> message) {
+        return new Message(jid, Message.Type.CHAT, message.getContent().getBody());
+    }
 }

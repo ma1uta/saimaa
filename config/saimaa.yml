@@ -11,26 +11,27 @@ matrix:
   #  key_store: ~/keystore.pkcs12
   #  key_store_password: 123
 
-xmpp:
-  domain: 'xmpp-server'
-  port: 5269
-  ssl:
-    type: pkcs12
-    key_store: /home/saimaa/cert_xmpp/xmpps.pkcs12
-    key_store_password: xmpp
-    disable_ssl_validation: true
-  #ssl:
-  #  type: pem
-  #  key: ~/privkey.pem
-  #  chain: ~/chain.pem
+module:
+  xmpp:
+    domain: 'xmpp-server'
+    port: 5269
+    ssl:
+      type: pkcs12
+      key_store: /home/saimaa/cert_xmpp/xmpps.pkcs12
+      key_store_password: xmpp
+      disable_ssl_validation: true
+    #ssl:
+    #  type: pem
+    #  key: ~/privkey.pem
+    #  chain: ~/chain.pem
 
-activitypub:
-  domain: 'ap-server'
-  port: 80
-  ssl:
-    type: pem
-    key: /home/saimaa/cert_ap/key.pem
-    chain: /home/saimaa/cert_ap/chain.pem
+  activitypub:
+    domain: 'ap-server'
+    port: 80
+    ssl:
+      type: pem
+      key: /home/saimaa/cert_ap/key.pem
+      chain: /home/saimaa/cert_ap/chain.pem
 
 database:
   username: saimaa

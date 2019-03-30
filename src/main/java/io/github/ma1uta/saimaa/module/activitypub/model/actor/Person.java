@@ -14,33 +14,22 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
+package io.github.ma1uta.saimaa.module.activitypub.model.actor;
 
-import java.util.Map;
+import io.github.ma1uta.saimaa.module.activitypub.model.core.Object;
 
 /**
- * Module.
+ * <a href="https://www.w3.org/TR/activitystreams-vocabulary/#dfn-person">Person</a>.
  */
-public interface Module extends AutoCloseable {
+public class Person extends Object {
 
     /**
-     * Module name.
-     *
-     * @return module name.
+     * Type.
      */
-    String getName();
+    public static final String TYPE = "Person";
 
-    /**
-     * Initialize module.
-     *
-     * @param config configuration.
-     * @param bridge bridge.
-     * @throws Exception when initialization was failed.
-     */
-    void init(Map config, Bridge bridge) throws Exception;
-
-    /**
-     * Run module.
-     */
-    void run();
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 }

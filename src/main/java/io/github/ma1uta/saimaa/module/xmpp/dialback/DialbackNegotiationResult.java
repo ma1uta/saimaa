@@ -14,33 +14,30 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
-
-import java.util.Map;
+package io.github.ma1uta.saimaa.module.xmpp.dialback;
 
 /**
- * Module.
+ * Result of the Server Dialback negotiation.
  */
-public interface Module extends AutoCloseable {
+public enum DialbackNegotiationResult {
 
     /**
-     * Module name.
-     *
-     * @return module name.
+     * Negotiation has been failed.
      */
-    String getName();
+    FAILED,
 
     /**
-     * Initialize module.
-     *
-     * @param config configuration.
-     * @param bridge bridge.
-     * @throws Exception when initialization was failed.
+     * Negotiation has been successfully negotiated.
      */
-    void init(Map config, Bridge bridge) throws Exception;
+    SUCCESS,
 
     /**
-     * Run module.
+     * Negotiation in process.
      */
-    void run();
+    IN_PROCESS,
+
+    /**
+     * Negotiation has been ignored.
+     */
+    IGNORED
 }

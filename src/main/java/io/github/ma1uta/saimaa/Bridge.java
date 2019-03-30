@@ -20,10 +20,9 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.ma1uta.saimaa.config.AppConfig;
 import io.github.ma1uta.saimaa.config.DatabaseConfig;
-import io.github.ma1uta.saimaa.config.MatrixConfig;
-import io.github.ma1uta.saimaa.config.XmppConfig;
-import io.github.ma1uta.saimaa.matrix.MatrixServer;
-import io.github.ma1uta.saimaa.xmpp.XmppServer;
+import io.github.ma1uta.saimaa.module.activitypub.ActivityPubModule;
+import io.github.ma1uta.saimaa.module.matrix.MatrixModule;
+import io.github.ma1uta.saimaa.module.xmpp.XmppModule;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
@@ -37,6 +36,9 @@ import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * Matrix-XMPP bridge.
  */
@@ -44,12 +46,10 @@ public class Bridge {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Loggers.LOGGER);
 
-    private MatrixServer matrixServer;
-    private XmppServer xmppServer;
-
     private HikariDataSource dataSource;
-
     private Jdbi jdbi;
+
+    private LinkedHashMap<String, Module> modules = new LinkedHashMap<>();
 
     /**
      * Run bridge with the specified configuration.
@@ -59,31 +59,44 @@ public class Bridge {
      */
     public void run(AppConfig config) throws Exception {
         initDatabase(config.getDatabase());
+        initModules(config);
 
         RouterFactory routerFactory = initRouters(config);
 
-        initMatrix(config.getMatrix(), routerFactory);
-        initXmpp(config.getXmpp(), routerFactory);
-
-        for (AbstractRouter<?> router : routerFactory.getXmppRouters().values()) {
-            router.init(jdbi, xmppServer, matrixServer);
-        }
-        for (AbstractRouter<?> router : routerFactory.getMatrixRouters().values()) {
-            router.init(jdbi, xmppServer, matrixServer);
-        }
-
-        this.matrixServer.run();
-        this.xmppServer.run();
+        modules.values().forEach(Module::run);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                this.matrixServer.close();
-                this.xmppServer.close();
-            } catch (Exception e) {
-                LOGGER.error("Failed to stop bridge", e);
-            }
+            modules.forEach((name, module) -> {
+                try {
+                    module.close();
+                } catch (Exception e) {
+                    LOGGER.error(String.format("Failed to stop module: '%s'", name), e);
+                }
+            });
             dataSource.close();
         }));
+    }
+
+    private void initModules(AppConfig config) throws Exception {
+        Module module = new MatrixModule();
+        module.init(config.getMatrix(), this);
+        modules.put(MatrixModule.NAME, module);
+
+        for (Map.Entry<String, Map> moduleItem : config.getModule().entrySet()) {
+            String moduleName = moduleItem.getKey();
+            switch (moduleName) {
+                case XmppModule.NAME:
+                    module = new XmppModule();
+                    break;
+                case ActivityPubModule.NAME:
+                    module = new ActivityPubModule();
+                    break;
+                default:
+                    throw new IllegalArgumentException(String.format("Unknown module: '%s'", moduleName));
+            }
+            module.init(moduleItem.getValue(), this);
+            modules.put(moduleName, module);
+        }
     }
 
     private RouterFactory initRouters(AppConfig config) {
@@ -113,13 +126,7 @@ public class Bridge {
         liquibase.update(new Contexts(), new LabelExpression());
     }
 
-    private void initMatrix(MatrixConfig config, RouterFactory routerFactory) throws Exception {
-        this.matrixServer = new MatrixServer();
-        this.matrixServer.init(jdbi, config, routerFactory);
-    }
-
-    private void initXmpp(XmppConfig config, RouterFactory routerFactory) throws Exception {
-        this.xmppServer = new XmppServer();
-        this.xmppServer.init(jdbi, config, routerFactory);
+    public Jdbi getJdbi() {
+        return jdbi;
     }
 }

@@ -14,33 +14,21 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
-
-import java.util.Map;
-
 /**
- * Module.
+ * Server Dialback (https://xmpp.org/extensions/xep-0220.html).
  */
-public interface Module extends AutoCloseable {
 
-    /**
-     * Module name.
-     *
-     * @return module name.
-     */
-    String getName();
+@XmlSchema(
+    xmlns = {
+        @XmlNs(prefix = ServerDialback.PREFIX, namespaceURI = ServerDialback.NAMESPACE)
+    },
+    namespace = StreamHeader.STREAM_NAMESPACE,
+    elementFormDefault = XmlNsForm.QUALIFIED
+)
+package io.github.ma1uta.saimaa.module.xmpp.dialback;
 
-    /**
-     * Initialize module.
-     *
-     * @param config configuration.
-     * @param bridge bridge.
-     * @throws Exception when initialization was failed.
-     */
-    void init(Map config, Bridge bridge) throws Exception;
+import rocks.xmpp.core.stream.model.StreamHeader;
 
-    /**
-     * Run module.
-     */
-    void run();
-}
+import javax.xml.bind.annotation.XmlNs;
+import javax.xml.bind.annotation.XmlNsForm;
+import javax.xml.bind.annotation.XmlSchema;

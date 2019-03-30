@@ -14,33 +14,22 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
+package io.github.ma1uta.saimaa.module.activitypub.model.actor;
 
-import java.util.Map;
+import io.github.ma1uta.saimaa.module.activitypub.model.core.Object;
 
 /**
- * Module.
+ * <a href="https://www.w3.org/TR/activitystreams-vocabulary/#dfn-group">Group</a>.
  */
-public interface Module extends AutoCloseable {
+public class Group extends Object {
 
     /**
-     * Module name.
-     *
-     * @return module name.
+     * Type.
      */
-    String getName();
+    public static final String TYPE = "Group";
 
-    /**
-     * Initialize module.
-     *
-     * @param config configuration.
-     * @param bridge bridge.
-     * @throws Exception when initialization was failed.
-     */
-    void init(Map config, Bridge bridge) throws Exception;
-
-    /**
-     * Run module.
-     */
-    void run();
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 }

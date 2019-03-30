@@ -14,33 +14,23 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
+package io.github.ma1uta.saimaa.module.xmpp.dialback;
 
-import java.util.Map;
+import rocks.xmpp.addr.Jid;
+
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Module.
+ * Dialback verification.
  */
-public interface Module extends AutoCloseable {
+@XmlRootElement(name = "verify", namespace = ServerDialback.NAMESPACE)
+public class Verify extends DialbackElement {
 
-    /**
-     * Module name.
-     *
-     * @return module name.
-     */
-    String getName();
+    public Verify() {
+        super(null, null, null, null, null);
+    }
 
-    /**
-     * Initialize module.
-     *
-     * @param config configuration.
-     * @param bridge bridge.
-     * @throws Exception when initialization was failed.
-     */
-    void init(Map config, Bridge bridge) throws Exception;
-
-    /**
-     * Run module.
-     */
-    void run();
+    public Verify(String id, Jid to, Jid from, String key, String type) {
+        super(id, to, from, key, type);
+    }
 }

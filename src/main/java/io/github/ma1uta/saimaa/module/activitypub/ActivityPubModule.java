@@ -14,33 +14,40 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
+package io.github.ma1uta.saimaa.module.activitypub;
+
+import io.github.ma1uta.saimaa.Bridge;
+import io.github.ma1uta.saimaa.Module;
 
 import java.util.Map;
 
 /**
- * Module.
+ * ActivityPub module.
  */
-public interface Module extends AutoCloseable {
+public class ActivityPubModule implements Module {
 
     /**
      * Module name.
-     *
-     * @return module name.
      */
-    String getName();
+    public static final String NAME = "activitypub";
 
-    /**
-     * Initialize module.
-     *
-     * @param config configuration.
-     * @param bridge bridge.
-     * @throws Exception when initialization was failed.
-     */
-    void init(Map config, Bridge bridge) throws Exception;
+    @Override
+    public String getName() {
+        return NAME;
+    }
 
-    /**
-     * Run module.
-     */
-    void run();
+    @Override
+    public void init(Map config, Bridge bridge) throws Exception {
+
+    }
+
+    @Override
+    public void run() {
+
+    }
+
+    @Override
+    public void close() throws Exception {
+
+    }
 }

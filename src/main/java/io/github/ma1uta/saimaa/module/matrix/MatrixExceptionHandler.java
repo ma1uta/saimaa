@@ -14,33 +14,15 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
+package io.github.ma1uta.saimaa.module.matrix;
 
-import java.util.Map;
+import io.github.ma1uta.matrix.impl.exception.ExceptionHandler;
+
+import javax.ws.rs.ext.Provider;
 
 /**
- * Module.
+ * Exception handler.
  */
-public interface Module extends AutoCloseable {
-
-    /**
-     * Module name.
-     *
-     * @return module name.
-     */
-    String getName();
-
-    /**
-     * Initialize module.
-     *
-     * @param config configuration.
-     * @param bridge bridge.
-     * @throws Exception when initialization was failed.
-     */
-    void init(Map config, Bridge bridge) throws Exception;
-
-    /**
-     * Run module.
-     */
-    void run();
+@Provider
+public class MatrixExceptionHandler extends ExceptionHandler {
 }

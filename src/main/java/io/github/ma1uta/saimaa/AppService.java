@@ -48,16 +48,13 @@ public class AppService {
      * Main entry point.
      *
      * @param args command line arguments.
-     * @throws Exception when cannot run the bridge.
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         CommandLine.populateCommand(new AppService(), args).run();
     }
 
     /**
      * Run AppService.
-     *
-     * @throws Exception when cannot run the bridge.
      */
     public void run() {
         try {
@@ -79,7 +76,7 @@ public class AppService {
 
             new Bridge().run(appConfig);
         } catch (Exception e) {
-            LOGGER.error("Failed run the bridge", e);
+            LOGGER.error("Failed run the bridge.", e);
         }
     }
 }

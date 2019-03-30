@@ -14,33 +14,12 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
+package io.github.ma1uta.saimaa.module.xmpp.dialback;
 
-import java.util.Map;
+import rocks.xmpp.core.stream.model.StreamElement;
 
 /**
- * Module.
+ * Dialback error.
  */
-public interface Module extends AutoCloseable {
-
-    /**
-     * Module name.
-     *
-     * @return module name.
-     */
-    String getName();
-
-    /**
-     * Initialize module.
-     *
-     * @param config configuration.
-     * @param bridge bridge.
-     * @throws Exception when initialization was failed.
-     */
-    void init(Map config, Bridge bridge) throws Exception;
-
-    /**
-     * Run module.
-     */
-    void run();
+public class DialbackError implements StreamElement {
 }

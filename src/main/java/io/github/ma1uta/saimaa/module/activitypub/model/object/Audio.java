@@ -14,33 +14,20 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
-
-import java.util.Map;
+package io.github.ma1uta.saimaa.module.activitypub.model.object;
 
 /**
- * Module.
+ * <a href="https://www.w3.org/TR/activitystreams-vocabulary/#dfn-audio">Audio</a>.
  */
-public interface Module extends AutoCloseable {
+public class Audio extends Document {
 
     /**
-     * Module name.
-     *
-     * @return module name.
+     * Type.
      */
-    String getName();
+    public static final String TYPE = "Audio";
 
-    /**
-     * Initialize module.
-     *
-     * @param config configuration.
-     * @param bridge bridge.
-     * @throws Exception when initialization was failed.
-     */
-    void init(Map config, Bridge bridge) throws Exception;
-
-    /**
-     * Run module.
-     */
-    void run();
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 }

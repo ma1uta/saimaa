@@ -17,9 +17,9 @@
 package io.github.ma1uta.saimaa;
 
 import io.github.ma1uta.matrix.Id;
-import io.github.ma1uta.saimaa.config.MatrixConfig;
-import io.github.ma1uta.saimaa.matrix.MatrixServer;
-import io.github.ma1uta.saimaa.xmpp.XmppServer;
+import io.github.ma1uta.saimaa.module.matrix.MatrixConfig;
+import io.github.ma1uta.saimaa.module.matrix.MatrixModule;
+import io.github.ma1uta.saimaa.module.xmpp.XmppModule;
 import org.jdbi.v3.core.Jdbi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,32 +39,32 @@ public abstract class AbstractRouter<T> implements Function<T, Boolean> {
     protected static final Logger LOGGER = LoggerFactory.getLogger(Loggers.LOGGER);
 
     private Jdbi jdbi;
-    private XmppServer xmppServer;
-    private MatrixServer matrixServer;
+    private XmppModule xmppModule;
+    private MatrixModule matrixModule;
 
     public Jdbi getJdbi() {
         return jdbi;
     }
 
-    public XmppServer getXmppServer() {
-        return xmppServer;
+    public XmppModule getXmppModule() {
+        return xmppModule;
     }
 
-    public MatrixServer getMatrixServer() {
-        return matrixServer;
+    public MatrixModule getMatrixModule() {
+        return matrixModule;
     }
 
     /**
      * Init router.
      *
      * @param jdbi         persistence service.
-     * @param xmppServer   xmpp server.
-     * @param matrixServer matrix server.
+     * @param xmppModule   xmpp server.
+     * @param matrixModule matrix server.
      */
-    public void init(Jdbi jdbi, XmppServer xmppServer, MatrixServer matrixServer) {
+    public void init(Jdbi jdbi, XmppModule xmppModule, MatrixModule matrixModule) {
         this.jdbi = jdbi;
-        this.xmppServer = xmppServer;
-        this.matrixServer = matrixServer;
+        this.xmppModule = xmppModule;
+        this.matrixModule = matrixModule;
     }
 
     /**
@@ -74,7 +74,7 @@ public abstract class AbstractRouter<T> implements Function<T, Boolean> {
      * @return JID.
      */
     public String extractJidFromMxid(String mxid) {
-        String prefix = getMatrixServer().getConfig().getPrefix();
+        String prefix = getMatrixModule().getConfig().getPrefix();
         try {
             int delim = mxid.indexOf(":");
             String localpart = mxid.substring(1, delim);
@@ -120,7 +120,7 @@ public abstract class AbstractRouter<T> implements Function<T, Boolean> {
             throw new RuntimeException(e);
         }
         String prepMxid = encodedJid.replaceAll("%", "=");
-        MatrixConfig config = getMatrixServer().getConfig();
+        MatrixConfig config = getMatrixModule().getConfig();
         return Id.Sigil.USER + config.getPrefix() + prepMxid + ":" + config.getHomeserver();
     }
 
@@ -132,6 +132,6 @@ public abstract class AbstractRouter<T> implements Function<T, Boolean> {
      */
     public String encodeMxidToJid(String mxid) {
         String mxidWithoutSigil = mxid.substring(1);
-        return mxidWithoutSigil + "@" + getXmppServer().getConfig().getDomain();
+        return mxidWithoutSigil + "@" + getXmppModule().getConfig().getDomain();
     }
 }
