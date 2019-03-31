@@ -80,13 +80,7 @@ public class MatrixAppResource implements ApplicationApi {
                     if (dao.exist(txnId) == 0) {
                         dao.start(txnId, LocalDateTime.now());
 
-                        request.getEvents().parallelStream().forEach(event -> {
-                            try {
-                                getRouterFactory().process(event);
-                            } catch (Exception e) {
-                                LOGGER.error("Failed process event.", e);
-                            }
-                        });
+                        request.getEvents().parallelStream().forEach(event -> getRouterFactory().process(MatrixModule.NAME, event));
 
                         dao.finish(txnId, LocalDateTime.now());
                     }

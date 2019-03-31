@@ -20,8 +20,10 @@ import java.util.Map;
 
 /**
  * Module.
+ *
+ * @param <C> config type.
  */
-public interface Module extends AutoCloseable {
+public interface Module<C> extends AutoCloseable {
 
     /**
      * Module name.
@@ -43,4 +45,11 @@ public interface Module extends AutoCloseable {
      * Run module.
      */
     void run();
+
+    /**
+     * Retrieve module configuration.
+     *
+     * @return module configuration.
+     */
+    C getConfig();
 }

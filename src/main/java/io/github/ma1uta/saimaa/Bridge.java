@@ -23,6 +23,9 @@ import io.github.ma1uta.saimaa.config.DatabaseConfig;
 import io.github.ma1uta.saimaa.module.activitypub.ActivityPubModule;
 import io.github.ma1uta.saimaa.module.matrix.MatrixModule;
 import io.github.ma1uta.saimaa.module.xmpp.XmppModule;
+import io.github.ma1uta.saimaa.router.mxtoxmpp.MatrixXmppDirectInviteRouter;
+import io.github.ma1uta.saimaa.router.mxtoxmpp.MatrixXmppMessageRouter;
+import io.github.ma1uta.saimaa.router.xmpptomx.XmppMatrixDirectInviteRouter;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
@@ -36,7 +39,9 @@ import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,6 +53,7 @@ public class Bridge {
 
     private HikariDataSource dataSource;
     private Jdbi jdbi;
+    private RouterFactory routerFactory;
 
     private LinkedHashMap<String, Module> modules = new LinkedHashMap<>();
 
@@ -59,9 +65,10 @@ public class Bridge {
      */
     public void run(AppConfig config) throws Exception {
         initDatabase(config.getDatabase());
+        this.routerFactory = new RouterFactory();
         initModules(config);
 
-        RouterFactory routerFactory = initRouters(config);
+        initRouters();
 
         modules.values().forEach(Module::run);
 
@@ -99,8 +106,26 @@ public class Bridge {
         }
     }
 
-    private RouterFactory initRouters(AppConfig config) {
-        return new RouterFactory(config, jdbi);
+    private void initRouters() {
+        List<AbstractRouter> availableRouters = Arrays.asList(
+            // Matrix -> XMPP
+            new MatrixXmppDirectInviteRouter(),
+            new MatrixXmppMessageRouter(),
+
+            // XMPP -> Matrix
+            new XmppMatrixDirectInviteRouter()
+        );
+
+        for (Map.Entry<String, Module> source : modules.entrySet()) {
+            for (Map.Entry<String, Module> target : modules.entrySet()) {
+                for (AbstractRouter router : availableRouters) {
+                    if (router.canProcess(source.getKey(), target.getKey())) {
+                        router.init(this, source.getValue(), target.getValue());
+                        this.routerFactory.addModuleRouter(source.getKey(), target.getKey(), router);
+                    }
+                }
+            }
+        }
     }
 
     private void initDatabase(DatabaseConfig config) throws Exception {
@@ -128,5 +153,9 @@ public class Bridge {
 
     public Jdbi getJdbi() {
         return jdbi;
+    }
+
+    public RouterFactory getRouterFactory() {
+        return routerFactory;
     }
 }

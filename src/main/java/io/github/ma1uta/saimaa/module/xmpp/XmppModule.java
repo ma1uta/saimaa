@@ -21,10 +21,11 @@ import io.github.ma1uta.saimaa.Bridge;
 import io.github.ma1uta.saimaa.Module;
 import io.github.ma1uta.saimaa.RouterFactory;
 import io.github.ma1uta.saimaa.config.Cert;
+import io.github.ma1uta.saimaa.module.matrix.MatrixModule;
 import io.github.ma1uta.saimaa.module.xmpp.dialback.ServerDialback;
 import io.github.ma1uta.saimaa.module.xmpp.netty.XmppServerInitializer;
-import io.github.ma1uta.saimaa.module.xmpp.router.DirectInviteRouter;
 import io.github.ma1uta.saimaa.netty.NettyBuilder;
+import io.github.ma1uta.saimaa.router.xmpptomx.XmppMatrixDirectInviteRouter;
 import io.netty.channel.Channel;
 import org.jdbi.v3.core.Jdbi;
 import org.slf4j.Logger;
@@ -183,7 +184,7 @@ public class XmppModule implements Module {
 
         this.jdbi = bridge.getJdbi();
         this.config = xmppConfig;
-        this.routerFactory = routerFactory;
+        this.routerFactory = bridge.getRouterFactory();
         this.dialback = new ServerDialback(this);
         initSSL(xmppConfig);
         initRouters();
@@ -202,7 +203,7 @@ public class XmppModule implements Module {
     }
 
     private void initRouters() {
-        routerFactory.addXmppRouter(new DirectInviteRouter());
+        routerFactory.addModuleRouter(XmppModule.NAME, MatrixModule.NAME, new XmppMatrixDirectInviteRouter());
     }
 
     /**
@@ -254,7 +255,7 @@ public class XmppModule implements Module {
      * @param stanza incoming stanzas.
      */
     public void process(Stanza stanza) {
-        routerFactory.process(stanza);
+        routerFactory.process(XmppModule.NAME, stanza);
     }
 
     public SrvNameResolver getSrvNameResolver() {

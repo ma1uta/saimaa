@@ -16,16 +16,13 @@
 
 package io.github.ma1uta.saimaa;
 
-import io.github.ma1uta.matrix.event.Event;
-import io.github.ma1uta.saimaa.config.AppConfig;
-import org.apache.commons.collections4.MultiValuedMap;
-import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
-import org.jdbi.v3.core.Jdbi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rocks.xmpp.core.stanza.model.Stanza;
 
-import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Router factory.
@@ -34,77 +31,74 @@ public class RouterFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RouterFactory.class);
 
-    private final AppConfig config;
-    private final Jdbi jdbi;
-
-    private MultiValuedMap<Class, AbstractRouter<Event>> matrixRouters = new ArrayListValuedHashMap<>();
-    private MultiValuedMap<Class, AbstractRouter<Stanza>> xmppRouters = new ArrayListValuedHashMap<>();
-
-    public RouterFactory(AppConfig config, Jdbi jdbi) {
-        this.config = config;
-        this.jdbi = jdbi;
-    }
-
-    public AppConfig getConfig() {
-        return config;
-    }
-
-    public Jdbi getJdbi() {
-        return jdbi;
-    }
-
     /**
-     * Add matrix routers.
-     *
-     * @param key    route key.
-     * @param router new matrix router.
+     * Routers. Source -&gt; Target -&gt; routers.
      */
-    @SuppressWarnings("unchecked")
-    public void addMatrixRouter(Class<?> key, AbstractRouter<? extends Event> router) {
-        getMatrixRouters().put(key, (AbstractRouter<Event>) router);
-    }
-
-    public MultiValuedMap<Class, AbstractRouter<Event>> getMatrixRouters() {
-        return matrixRouters;
-    }
+    private Map<String, Map<String, Set<AbstractRouter>>> routers = new HashMap<>();
 
     /**
-     * Add xmpp routers.
+     * Add router.
      *
+     * @param from   source module name.
+     * @param to     target module name.
      * @param router new xmpp routers.
      */
-    @SuppressWarnings("unchecked")
-    public void addXmppRouter(AbstractRouter<? extends Stanza> router) {
-        Class<?> key = (Class<?>) ((ParameterizedType) router.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        getXmppRouters().put(key, (AbstractRouter<Stanza>) router);
-    }
-
-    public MultiValuedMap<Class, AbstractRouter<Stanza>> getXmppRouters() {
-        return xmppRouters;
+    public void addModuleRouter(String from, String to, AbstractRouter router) {
+        routers.computeIfAbsent(from, k -> new HashMap<>()).computeIfAbsent(to, k -> new HashSet<>()).add(router);
     }
 
     /**
-     * Process Matrix event.
+     * Get routes of the specific source and target.
      *
-     * @param event event.
+     * @param from source module.
+     * @return module routers.
      */
-    public void process(Event event) {
-        for (AbstractRouter<Event> router : getMatrixRouters().get(event.getClass())) {
-            if (router.apply(event)) {
-                break;
-            }
+    public Map<String, Set<AbstractRouter>> getModuleRouters(String from) {
+        return routers.getOrDefault(from, new HashMap<>());
+    }
+
+    /**
+     * Process message.
+     *
+     * @param from    source module.
+     * @param message message.
+     */
+    public void process(String from, Object message) {
+        LOGGER.debug("Process message from '{}'", from);
+        Map<String, Set<AbstractRouter>> routers = getModuleRouters(from);
+
+        if (routers.isEmpty()) {
+            LOGGER.warn("Empty routers.");
+            return;
         }
-    }
 
-    /**
-     * Process Xmpp stanza.
-     *
-     * @param stanza stanza.
-     */
-    public void process(Stanza stanza) {
-        for (AbstractRouter<Stanza> router : getXmppRouters().get(stanza.getClass())) {
-            if (router.apply(stanza)) {
-                break;
+        for (Map.Entry<String, Set<AbstractRouter>> target : routers.entrySet()) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Process message to '{}'", target.getKey());
+            }
+
+            Set<AbstractRouter> targetRouters = target.getValue();
+            if (targetRouters.isEmpty()) {
+                LOGGER.warn("Empty routers.");
+                continue;
+            }
+
+            for (AbstractRouter router : targetRouters) {
+                LOGGER.debug("Router: {}", router.getClass());
+                if (!router.canProcess(message)) {
+                    LOGGER.debug("Skip processing.");
+                    continue;
+                }
+                LOGGER.debug("Start processing.");
+                try {
+                    if (router.process(message)) {
+                        LOGGER.debug("Stop processing.");
+                        break;
+                    }
+                    LOGGER.debug("Next router.");
+                } catch (Exception e) {
+                    LOGGER.error("Failed process.", e);
+                }
             }
         }
     }

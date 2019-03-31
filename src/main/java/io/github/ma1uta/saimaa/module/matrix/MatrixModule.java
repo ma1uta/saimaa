@@ -21,10 +21,6 @@ import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.AppServiceClient;
 import io.github.ma1uta.matrix.client.factory.jaxrs.AppJaxRsRequestFactory;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
-import io.github.ma1uta.matrix.event.RoomMember;
-import io.github.ma1uta.matrix.event.RoomMessage;
-import io.github.ma1uta.matrix.event.content.RoomMessageContent;
-import io.github.ma1uta.matrix.event.message.Text;
 import io.github.ma1uta.matrix.support.jackson.JacksonContextResolver;
 import io.github.ma1uta.saimaa.Bridge;
 import io.github.ma1uta.saimaa.Loggers;
@@ -32,33 +28,26 @@ import io.github.ma1uta.saimaa.Module;
 import io.github.ma1uta.saimaa.RouterFactory;
 import io.github.ma1uta.saimaa.config.Cert;
 import io.github.ma1uta.saimaa.db.UserDao;
-import io.github.ma1uta.saimaa.module.matrix.converter.TextConverter;
-import io.github.ma1uta.saimaa.module.matrix.netty.JerseyServerInitializer;
-import io.github.ma1uta.saimaa.module.matrix.netty.NettyHttpContainer;
-import io.github.ma1uta.saimaa.module.matrix.router.DirectInviteRouter;
-import io.github.ma1uta.saimaa.module.matrix.router.MessageRouter;
+import io.github.ma1uta.saimaa.jaxrs.netty.JerseyServerInitializer;
+import io.github.ma1uta.saimaa.jaxrs.netty.NettyHttpContainer;
 import io.github.ma1uta.saimaa.netty.NettyBuilder;
 import io.netty.channel.Channel;
 import io.netty.handler.ssl.SslContext;
 import org.jdbi.v3.core.Jdbi;
 import org.slf4j.LoggerFactory;
-import rocks.xmpp.addr.Jid;
-import rocks.xmpp.core.stanza.model.Message;
 
 import java.net.URI;
 import java.security.SecureRandom;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.ClientBuilder;
 
 /**
  * All Matrix endpoints.
  */
-public class MatrixModule implements Module {
+public class MatrixModule implements Module<MatrixConfig> {
 
     /**
      * Module name.
@@ -80,14 +69,12 @@ public class MatrixModule implements Module {
 
         this.jdbi = bridge.getJdbi();
         this.config = matrixConfig;
-        this.routerFactory = routerFactory;
+        this.routerFactory = bridge.getRouterFactory();
 
         initMatrixClient();
         initMasterBot();
         initRestAPI();
         initSSL();
-        initRouters();
-
     }
 
     private void initMatrixClient() throws Exception {
@@ -145,15 +132,6 @@ public class MatrixModule implements Module {
         }
     }
 
-    private void initRouters() {
-        Map<Class<? extends RoomMessageContent>, BiFunction<Jid, RoomMessage<?>, Message>> messageConverters = new HashMap<>();
-        messageConverters.put(Text.class, new TextConverter());
-        MessageRouter router = new MessageRouter();
-        router.setConverters(messageConverters);
-        routerFactory.addMatrixRouter(RoomMessage.class, router);
-        routerFactory.addMatrixRouter(RoomMember.class, new DirectInviteRouter());
-    }
-
     @Override
     public String getName() {
         return NAME;
@@ -174,6 +152,7 @@ public class MatrixModule implements Module {
         channel.close().sync();
     }
 
+    @Override
     public MatrixConfig getConfig() {
         return config;
     }

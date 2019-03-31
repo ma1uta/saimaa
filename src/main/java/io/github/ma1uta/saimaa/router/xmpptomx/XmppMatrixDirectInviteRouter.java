@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.module.xmpp.router;
+package io.github.ma1uta.saimaa.router.xmpptomx;
 
 import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.AppServiceClient;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.client.model.room.CreateRoomRequest;
-import io.github.ma1uta.saimaa.AbstractRouter;
 import io.github.ma1uta.saimaa.db.DirectRoom;
 import io.github.ma1uta.saimaa.db.RoomDao;
 import io.github.ma1uta.saimaa.db.UserDao;
@@ -33,10 +32,16 @@ import java.util.Optional;
 /**
  * Process incoming xmpp invite presence.
  */
-public class DirectInviteRouter extends AbstractRouter<Presence> {
+public class XmppMatrixDirectInviteRouter extends XmppMatrixRouter {
 
     @Override
-    public Boolean apply(Presence presence) {
+    public boolean canProcess(Object message) {
+        return message instanceof Presence;
+    }
+
+    @Override
+    public boolean process(Object message) {
+        Presence presence = (Presence) message;
         if (!Presence.Type.SUBSCRIBE.equals(presence.getType())) {
             return false;
         }
@@ -48,8 +53,8 @@ public class DirectInviteRouter extends AbstractRouter<Presence> {
         }
 
         String jid = to.toString();
-        String target = extractMxidFromJid(jid);
-        String sender = encodeJidToMxid(jid);
+        String target = getIdHelper().extractMxidFromJid(jid);
+        String sender = getIdHelper().encodeJidToMxid(jid);
 
         return getJdbi().inTransaction(h -> {
             RoomDao roomDao = h.attach(RoomDao.class);

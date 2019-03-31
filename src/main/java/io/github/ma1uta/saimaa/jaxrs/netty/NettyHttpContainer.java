@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.module.matrix.netty;
+package io.github.ma1uta.saimaa.jaxrs.netty;
 
 import org.glassfish.jersey.server.ApplicationHandler;
 import org.glassfish.jersey.server.ResourceConfig;

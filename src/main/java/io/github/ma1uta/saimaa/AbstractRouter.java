@@ -16,122 +16,48 @@
 
 package io.github.ma1uta.saimaa;
 
-import io.github.ma1uta.matrix.Id;
-import io.github.ma1uta.saimaa.module.matrix.MatrixConfig;
-import io.github.ma1uta.saimaa.module.matrix.MatrixModule;
-import io.github.ma1uta.saimaa.module.xmpp.XmppModule;
-import org.jdbi.v3.core.Jdbi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.function.Function;
-
 /**
  * All routers can send response to matrix and xmpp (i. e. normal processing from xmpp to matrix and send errors back to the xmpp).
- *
- * @param <T> Message Type.
  */
-public abstract class AbstractRouter<T> implements Function<T, Boolean> {
+public abstract class AbstractRouter {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(Loggers.LOGGER);
 
-    private Jdbi jdbi;
-    private XmppModule xmppModule;
-    private MatrixModule matrixModule;
-
-    public Jdbi getJdbi() {
-        return jdbi;
-    }
-
-    public XmppModule getXmppModule() {
-        return xmppModule;
-    }
-
-    public MatrixModule getMatrixModule() {
-        return matrixModule;
-    }
+    /**
+     * Can router process this message.
+     *
+     * @param message message.
+     * @return {@code true} if router can process this message, else {@code false}.
+     */
+    public abstract boolean canProcess(Object message);
 
     /**
-     * Init router.
+     * Can router transform messages between two modules.
      *
-     * @param jdbi         persistence service.
-     * @param xmppModule   xmpp server.
-     * @param matrixModule matrix server.
+     * @param from source module.
+     * @param to   target module.
+     * @return {@code true} if module process from source module to target.
      */
-    public void init(Jdbi jdbi, XmppModule xmppModule, MatrixModule matrixModule) {
-        this.jdbi = jdbi;
-        this.xmppModule = xmppModule;
-        this.matrixModule = matrixModule;
-    }
+    public abstract boolean canProcess(String from, String to);
 
     /**
-     * Map MXID to JID.
+     * Process message.
      *
-     * @param mxid MXID.
-     * @return JID.
+     * @param message message.
+     * @return {@code true} if processing should be stop, else {@code false} if next router can process message.
+     * @throws Exception when processing was failed.
      */
-    public String extractJidFromMxid(String mxid) {
-        String prefix = getMatrixModule().getConfig().getPrefix();
-        try {
-            int delim = mxid.indexOf(":");
-            String localpart = mxid.substring(1, delim);
-            String prepMxid = localpart.startsWith(prefix) ? localpart.substring(prefix.length()) : localpart;
-            String encodedJid = prepMxid.replaceAll("=", "%");
-            return URLDecoder.decode(encodedJid, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("Your JRE doesn't have UTF-8 encoder", e);
-            throw new RuntimeException(e);
-        }
-    }
+    public abstract boolean process(Object message) throws Exception;
 
     /**
-     * Map JID to MXID.
+     * Initialize router.
      *
-     * @param jid JID.
-     * @return MXID.
+     * @param bridge appservice.
+     * @param source source module.
+     * @param target target module.
      */
-    public String extractMxidFromJid(String jid) {
-        int localpartIndex = jid.indexOf("@");
-        String localpart = localpartIndex == -1 ? jid : jid.substring(0, localpartIndex);
-
-        try {
-            return URLDecoder.decode(localpart, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("Your JRE doesn't have UTF-8 decoder", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Map JID to MXID.
-     *
-     * @param jid JID.
-     * @return MXID.
-     */
-    public String encodeJidToMxid(String jid) {
-        String encodedJid;
-        try {
-            encodedJid = URLEncoder.encode(jid, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("Your JRE doesn't have UTF-8 decoder", e);
-            throw new RuntimeException(e);
-        }
-        String prepMxid = encodedJid.replaceAll("%", "=");
-        MatrixConfig config = getMatrixModule().getConfig();
-        return Id.Sigil.USER + config.getPrefix() + prepMxid + ":" + config.getHomeserver();
-    }
-
-    /**
-     * Encode MXID to double-puppet JID.
-     *
-     * @param mxid MXID.
-     * @return JID.
-     */
-    public String encodeMxidToJid(String mxid) {
-        String mxidWithoutSigil = mxid.substring(1);
-        return mxidWithoutSigil + "@" + getXmppModule().getConfig().getDomain();
-    }
+    public abstract void init(Bridge bridge, Module source, Module target);
 }

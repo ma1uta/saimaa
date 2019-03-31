@@ -47,6 +47,11 @@ public class ActivityPubModule implements Module {
     }
 
     @Override
+    public Object getConfig() {
+        return null;
+    }
+
+    @Override
     public void close() throws Exception {
 
     }

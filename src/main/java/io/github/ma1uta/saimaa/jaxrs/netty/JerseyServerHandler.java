@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.module.matrix.netty;
+package io.github.ma1uta.saimaa.jaxrs.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;

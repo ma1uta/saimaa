@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.module.matrix.netty;
+package io.github.ma1uta.saimaa.jaxrs.netty;
 
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -110,11 +110,11 @@ class NettyResponseWriter implements ContainerResponseWriter {
 
             JerseyChunkedInput jerseyChunkedInput = new JerseyChunkedInput(ctx.channel());
 
-            if (HttpUtil.isTransferEncodingChunked(response)) {
-                ctx.write(new HttpChunkedInput(jerseyChunkedInput)).addListener(FLUSH_FUTURE);
-            } else {
-                ctx.write(new HttpChunkedInput(jerseyChunkedInput)).addListener(FLUSH_FUTURE);
-            }
+            //if (HttpUtil.isTransferEncodingChunked(response)) {
+            ctx.write(new HttpChunkedInput(jerseyChunkedInput)).addListener(FLUSH_FUTURE);
+            //} else {
+            //    ctx.write(new HttpChunkedInput(jerseyChunkedInput)).addListener(FLUSH_FUTURE);
+            //}
             return jerseyChunkedInput;
 
         } else {

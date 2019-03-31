@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.module.matrix.router;
+package io.github.ma1uta.saimaa.router.mxtoxmpp;
 
 import io.github.ma1uta.matrix.event.RoomMessage;
 import io.github.ma1uta.matrix.event.content.RoomMessageContent;
-import io.github.ma1uta.saimaa.AbstractRouter;
+import io.github.ma1uta.matrix.event.message.Text;
+import io.github.ma1uta.saimaa.Bridge;
+import io.github.ma1uta.saimaa.Module;
 import io.github.ma1uta.saimaa.db.DirectRoom;
 import io.github.ma1uta.saimaa.db.RoomDao;
+import io.github.ma1uta.saimaa.module.matrix.converter.TextConverter;
 import rocks.xmpp.addr.Jid;
 import rocks.xmpp.core.stanza.model.Message;
 import rocks.xmpp.core.stanza.model.server.ServerMessage;
@@ -32,7 +35,7 @@ import java.util.function.BiFunction;
 /**
  * Matrix to XMPP message router.
  */
-public class MessageRouter extends AbstractRouter<RoomMessage<?>> {
+public class MatrixXmppMessageRouter extends MatrixXmppRouter {
 
     private Map<Class<? extends RoomMessageContent>, BiFunction<Jid, RoomMessage<?>, Message>> converters = new HashMap<>();
 
@@ -42,30 +45,32 @@ public class MessageRouter extends AbstractRouter<RoomMessage<?>> {
      * @param key message class.
      * @return converter.
      */
-    public BiFunction<Jid, RoomMessage<?>, Message> getConverter(Class<? extends RoomMessageContent> key) {
+    private BiFunction<Jid, RoomMessage<?>, Message> getConverter(Class<? extends RoomMessageContent> key) {
         return converters.get(key);
     }
 
-    public void setConverters(Map<Class<? extends RoomMessageContent>, BiFunction<Jid, RoomMessage<?>, Message>> converters) {
-        this.converters = converters;
+    @Override
+    public boolean canProcess(Object message) {
+        return message instanceof RoomMessage;
     }
 
     @Override
-    public Boolean apply(RoomMessage<?> message) {
-        BiFunction<Jid, RoomMessage<?>, Message> converter = getConverter(message.getContent().getClass());
+    public boolean process(Object message) {
+        RoomMessage<?> roomMessage = (RoomMessage<?>) message;
+        BiFunction<Jid, RoomMessage<?>, Message> converter = getConverter(roomMessage.getContent().getClass());
         if (converter == null) {
             return false;
         }
 
         return getJdbi().inTransaction(h -> {
             RoomDao roomDao = h.attach(RoomDao.class);
-            DirectRoom room = roomDao.findDirectRoomByUserId(message.getSender());
+            DirectRoom room = roomDao.findDirectRoomByUserId(roomMessage.getSender());
             if (room == null) {
                 return false;
             }
 
-            ServerMessage xmppMessage = ServerMessage.from(converter.apply(room.getXmppJid(), message));
-            xmppMessage.setFrom(Jid.of(extractJidFromMxid(message.getSender())));
+            ServerMessage xmppMessage = ServerMessage.from(converter.apply(room.getXmppJid(), roomMessage));
+            xmppMessage.setFrom(Jid.of(getIdHelper().extractJidFromMxid(roomMessage.getSender())));
 
             try {
                 getXmppModule().send(xmppMessage);
@@ -75,5 +80,11 @@ public class MessageRouter extends AbstractRouter<RoomMessage<?>> {
                 return false;
             }
         });
+    }
+
+    @Override
+    public void init(Bridge bridge, Module source, Module target) {
+        super.init(bridge, source, target);
+        converters.put(Text.class, new TextConverter());
     }
 }
