@@ -16,12 +16,10 @@
 
 package io.github.ma1uta.saimaa.module.activitypub.model.actor;
 
-import io.github.ma1uta.saimaa.module.activitypub.model.core.Object;
-
 /**
  * <a href="https://www.w3.org/TR/activitystreams-vocabulary/#dfn-service">Service</a>.
  */
-public class Service extends Object {
+public class Service extends Actor {
 
     /**
      * Type.

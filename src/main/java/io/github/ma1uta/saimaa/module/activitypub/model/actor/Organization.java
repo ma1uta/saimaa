@@ -16,12 +16,10 @@
 
 package io.github.ma1uta.saimaa.module.activitypub.model.actor;
 
-import io.github.ma1uta.saimaa.module.activitypub.model.core.Object;
-
 /**
  * <a href="https://www.w3.org/TR/activitystreams-vocabulary/#dfn-organization">Organization</a>.
  */
-public class Organization extends Object {
+public class Organization extends Actor {
 
     /**
      * Type.

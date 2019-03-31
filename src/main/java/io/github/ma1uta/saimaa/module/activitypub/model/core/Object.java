@@ -59,6 +59,9 @@ public class Object extends Contextable {
     @JsonDeserialize(using = ObjectDeserializer.class)
     private java.lang.Object generator;
 
+    @JsonDeserialize(using = ObjectDeserializer.class)
+    private java.lang.Object icon;
+
     private Document image;
 
     @JsonDeserialize(using = ObjectDeserializer.class)
@@ -111,7 +114,7 @@ public class Object extends Contextable {
         return attachment;
     }
 
-    public void setAttachment(Object attachment) {
+    public void setAttachment(java.lang.Object attachment) {
         this.attachment = attachment;
     }
 
@@ -119,7 +122,7 @@ public class Object extends Contextable {
         return attributedTo;
     }
 
-    public void setAttributedTo(Object attributedTo) {
+    public void setAttributedTo(java.lang.Object attributedTo) {
         this.attributedTo = attributedTo;
     }
 
@@ -127,7 +130,7 @@ public class Object extends Contextable {
         return audience;
     }
 
-    public void setAudience(Object audience) {
+    public void setAudience(java.lang.Object audience) {
         this.audience = audience;
     }
 
@@ -143,7 +146,7 @@ public class Object extends Contextable {
         return context;
     }
 
-    public void setContext(Object context) {
+    public void setContext(java.lang.Object context) {
         this.context = context;
     }
 
@@ -167,8 +170,16 @@ public class Object extends Contextable {
         return generator;
     }
 
-    public void setGenerator(Object generator) {
+    public void setGenerator(java.lang.Object generator) {
         this.generator = generator;
+    }
+
+    public java.lang.Object getIcon() {
+        return icon;
+    }
+
+    public void setIcon(java.lang.Object icon) {
+        this.icon = icon;
     }
 
     public Document getImage() {
@@ -183,7 +194,7 @@ public class Object extends Contextable {
         return inReplyTo;
     }
 
-    public void setInReplyTo(Object inReplyTo) {
+    public void setInReplyTo(java.lang.Object inReplyTo) {
         this.inReplyTo = inReplyTo;
     }
 
@@ -191,7 +202,7 @@ public class Object extends Contextable {
         return location;
     }
 
-    public void setLocation(Object location) {
+    public void setLocation(java.lang.Object location) {
         this.location = location;
     }
 
@@ -199,7 +210,7 @@ public class Object extends Contextable {
         return preview;
     }
 
-    public void setPreview(Object preview) {
+    public void setPreview(java.lang.Object preview) {
         this.preview = preview;
     }
 
@@ -255,7 +266,7 @@ public class Object extends Contextable {
         return url;
     }
 
-    public void setUrl(Object url) {
+    public void setUrl(java.lang.Object url) {
         this.url = url;
     }
 
