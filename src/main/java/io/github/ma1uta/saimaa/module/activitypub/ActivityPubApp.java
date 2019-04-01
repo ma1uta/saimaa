@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.db;
+package io.github.ma1uta.saimaa.module.activitypub;
 
-import org.jdbi.v3.core.mapper.RowMapper;
-import org.jdbi.v3.core.statement.StatementContext;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
 
 /**
- * DirectRoom Row mapper.
+ * ActivityPub JAX-RS application.
  */
-public class DirectRoomMapper implements RowMapper<DirectRoom> {
+@ApplicationPath("")
+public class ActivityPubApp extends Application {
+
+    private final Set<Object> resources = new HashSet<>();
+
+    public ActivityPubApp(Set<Object> resources) {
+        this.resources.addAll(resources);
+    }
 
     @Override
-    public DirectRoom map(ResultSet rs, StatementContext ctx) throws SQLException {
-        DirectRoom room = new DirectRoom();
-        room.setRoomId(rs.getString("room_id"));
-        room.setMatrixUser(rs.getString("matrix_user"));
-        room.setXmppUser(rs.getString("xmpp_user"));
-        return room;
+    public Set<Object> getSingletons() {
+        return resources;
     }
 }

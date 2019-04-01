@@ -29,7 +29,7 @@ public abstract class Contextable {
     @JsonProperty(value = "@context")
     @JsonDeserialize(using = ProcessingContextDeserializer.class)
     @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
-    private Object processingContext;
+    private java.lang.Object processingContext;
 
     private String id;
 
@@ -41,11 +41,11 @@ public abstract class Contextable {
     @JsonProperty(value = "type", access = JsonProperty.Access.READ_ONLY)
     public abstract String getType();
 
-    public Object getProcessingContext() {
+    public java.lang.Object getProcessingContext() {
         return processingContext;
     }
 
-    public void setProcessingContext(Object processingContext) {
+    public void setProcessingContext(java.lang.Object processingContext) {
         this.processingContext = processingContext;
     }
 

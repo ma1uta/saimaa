@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.db;
+package io.github.ma1uta.saimaa.db.activitypub;
+
+import org.jdbi.v3.core.mapper.RowMapper;
+import org.jdbi.v3.core.statement.StatementContext;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
- * Matrix appuser.
+ * ACtor row mapper.
  */
-public class AppUser {
+public class ActorRowMapper implements RowMapper<Actor> {
 
-    private String localpart;
-
-    public String getLocalpart() {
-        return localpart;
-    }
-
-    public void setLocalpart(String localpart) {
-        this.localpart = localpart;
+    @Override
+    public Actor map(ResultSet rs, StatementContext ctx) throws SQLException {
+        Actor actor = new Actor();
+        actor.setMxid(rs.getString("mxid"));
+        actor.setRoomId(rs.getString("room_id"));
+        actor.setGroup(rs.getBoolean("group"));
+        return actor;
     }
 }

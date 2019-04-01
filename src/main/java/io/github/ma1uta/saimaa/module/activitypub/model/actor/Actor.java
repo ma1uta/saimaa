@@ -16,9 +16,7 @@
 
 package io.github.ma1uta.saimaa.module.activitypub.model.actor;
 
-import io.github.ma1uta.saimaa.module.activitypub.model.core.Collection;
 import io.github.ma1uta.saimaa.module.activitypub.model.core.Object;
-import io.github.ma1uta.saimaa.module.activitypub.model.core.OrderedCollection;
 
 import java.util.Map;
 
@@ -27,67 +25,67 @@ import java.util.Map;
  */
 public abstract class Actor extends Object {
 
-    private OrderedCollection inbox;
+    private String inbox;
 
-    private OrderedCollection outbox;
+    private String outbox;
 
-    private Collection following;
+    private String following;
 
-    private Collection followers;
+    private String followers;
 
-    private Collection liked;
+    private String liked;
 
-    private Collection streams;
+    private String streams;
 
     private String preferredUsername;
 
     private Map<String, Endpoint> endpoints;
 
-    public OrderedCollection getInbox() {
+    public String getInbox() {
         return inbox;
     }
 
-    public void setInbox(OrderedCollection inbox) {
+    public void setInbox(String inbox) {
         this.inbox = inbox;
     }
 
-    public OrderedCollection getOutbox() {
+    public String getOutbox() {
         return outbox;
     }
 
-    public void setOutbox(OrderedCollection outbox) {
+    public void setOutbox(String outbox) {
         this.outbox = outbox;
     }
 
-    public Collection getFollowing() {
+    public String getFollowing() {
         return following;
     }
 
-    public void setFollowing(Collection following) {
+    public void setFollowing(String following) {
         this.following = following;
     }
 
-    public Collection getFollowers() {
+    public String getFollowers() {
         return followers;
     }
 
-    public void setFollowers(Collection followers) {
+    public void setFollowers(String followers) {
         this.followers = followers;
     }
 
-    public Collection getLiked() {
+    public String getLiked() {
         return liked;
     }
 
-    public void setLiked(Collection liked) {
+    public void setLiked(String liked) {
         this.liked = liked;
     }
 
-    public Collection getStreams() {
+    public String getStreams() {
         return streams;
     }
 
-    public void setStreams(Collection streams) {
+    public void setStreams(String streams) {
         this.streams = streams;
     }
 

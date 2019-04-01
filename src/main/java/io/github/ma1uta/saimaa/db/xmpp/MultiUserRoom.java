@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.db;
+package io.github.ma1uta.saimaa.db.xmpp;
 
 /**
  * Multiuser chats.

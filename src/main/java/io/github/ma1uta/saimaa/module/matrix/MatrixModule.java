@@ -27,7 +27,7 @@ import io.github.ma1uta.saimaa.Loggers;
 import io.github.ma1uta.saimaa.Module;
 import io.github.ma1uta.saimaa.RouterFactory;
 import io.github.ma1uta.saimaa.config.Cert;
-import io.github.ma1uta.saimaa.db.UserDao;
+import io.github.ma1uta.saimaa.db.matrix.UserDao;
 import io.github.ma1uta.saimaa.jaxrs.netty.JerseyServerInitializer;
 import io.github.ma1uta.saimaa.jaxrs.netty.NettyHttpContainer;
 import io.github.ma1uta.saimaa.netty.NettyBuilder;
