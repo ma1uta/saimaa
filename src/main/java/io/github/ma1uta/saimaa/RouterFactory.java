@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.saimaa;
 
+import io.github.ma1uta.saimaa.router.AbstractRouter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

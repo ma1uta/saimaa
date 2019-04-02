@@ -16,8 +16,8 @@
 
 package io.github.ma1uta.saimaa.module.xmpp;
 
-import io.github.ma1uta.saimaa.ModuleConfig;
 import io.github.ma1uta.saimaa.config.Cert;
+import io.github.ma1uta.saimaa.module.ModuleConfig;
 
 /**
  * XMPP side config.

@@ -17,8 +17,8 @@
 package io.github.ma1uta.saimaa.module.matrix;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.github.ma1uta.saimaa.ModuleConfig;
 import io.github.ma1uta.saimaa.config.Cert;
+import io.github.ma1uta.saimaa.module.ModuleConfig;
 
 /**
  * Matrix configuration.

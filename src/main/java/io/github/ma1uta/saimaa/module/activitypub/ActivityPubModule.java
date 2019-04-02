@@ -16,9 +16,9 @@
 
 package io.github.ma1uta.saimaa.module.activitypub;
 
-import io.github.ma1uta.saimaa.Module;
 import io.github.ma1uta.saimaa.jaxrs.netty.JerseyServerInitializer;
 import io.github.ma1uta.saimaa.jaxrs.netty.NettyHttpContainer;
+import io.github.ma1uta.saimaa.module.Module;
 import io.github.ma1uta.saimaa.netty.NettyBuilder;
 import io.netty.channel.Channel;
 import io.netty.handler.ssl.SslContext;
@@ -27,7 +27,6 @@ import org.jdbi.v3.core.Jdbi;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
@@ -55,8 +54,8 @@ public class ActivityPubModule implements Module<ActivityPubConfig> {
         return NAME;
     }
 
-    @PostConstruct
-    private void init() throws Exception {
+    @Override
+    public void run() throws Exception {
         Set<Object> resources = new HashSet<>();
         resources.add(new WebfingerResource(this.jdbi, this.apConfig));
         resources.add(new ActivityPubResource(this.jdbi, this.apConfig));
@@ -65,10 +64,7 @@ public class ActivityPubModule implements Module<ActivityPubConfig> {
         if (this.apConfig.getSsl() != null) {
             this.sslContext = this.apConfig.getSsl().createNettyContext();
         }
-    }
 
-    @Override
-    public void run() {
         URI uri = URI.create(getConfig().getUrl());
 
         NettyHttpContainer container = new NettyHttpContainer(app);

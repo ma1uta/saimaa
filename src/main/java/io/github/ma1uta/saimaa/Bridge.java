@@ -18,9 +18,10 @@ package io.github.ma1uta.saimaa;
 
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.ma1uta.saimaa.config.AppConfig;
-import io.github.ma1uta.saimaa.router.mxtoxmpp.MatrixXmppDirectInviteRouter;
-import io.github.ma1uta.saimaa.router.mxtoxmpp.MatrixXmppMessageRouter;
-import io.github.ma1uta.saimaa.router.xmpptomx.XmppMatrixDirectInviteRouter;
+import io.github.ma1uta.saimaa.module.Module;
+import io.github.ma1uta.saimaa.module.ModuleLoader;
+import io.github.ma1uta.saimaa.router.AbstractRouter;
+import io.github.ma1uta.saimaa.router.RouterLoader;
 import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
@@ -33,9 +34,7 @@ import org.osgl.inject.annotation.MapKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 
@@ -59,6 +58,9 @@ public class Bridge {
     @LoadCollection(ModuleLoader.class)
     private LinkedHashMap<String, Module> modules;
 
+    @LoadCollection(RouterLoader.class)
+    private Iterable<AbstractRouter> routers;
+
     /**
      * Run bridge with the specified configuration.
      *
@@ -68,7 +70,9 @@ public class Bridge {
         updateSchema();
         initRouters();
 
-        modules.values().forEach(Module::run);
+        for (Module module : modules.values()) {
+            module.run();
+        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             modules.forEach((name, module) -> {
@@ -83,18 +87,9 @@ public class Bridge {
     }
 
     private void initRouters() {
-        List<AbstractRouter> availableRouters = Arrays.asList(
-            // Matrix -> XMPP
-            new MatrixXmppDirectInviteRouter(),
-            new MatrixXmppMessageRouter(),
-
-            // XMPP -> Matrix
-            new XmppMatrixDirectInviteRouter()
-        );
-
         for (Map.Entry<String, Module> source : modules.entrySet()) {
             for (Map.Entry<String, Module> target : modules.entrySet()) {
-                for (AbstractRouter router : availableRouters) {
+                for (AbstractRouter router : routers) {
                     if (router.canProcess(source.getKey(), target.getKey())) {
                         this.routerFactory.addModuleRouter(source.getKey(), target.getKey(), router);
                     }

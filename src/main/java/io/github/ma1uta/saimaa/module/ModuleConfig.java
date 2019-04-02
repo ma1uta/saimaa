@@ -14,31 +14,10 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
+package io.github.ma1uta.saimaa.module;
 
 /**
- * Module.
- *
- * @param <C> config type.
+ * Module configuration.
  */
-public interface Module<C> extends AutoCloseable {
-
-    /**
-     * Module name.
-     *
-     * @return module name.
-     */
-    String getName();
-
-    /**
-     * Run module.
-     */
-    void run();
-
-    /**
-     * Retrieve module configuration.
-     *
-     * @return module configuration.
-     */
-    C getConfig();
+public interface ModuleConfig {
 }

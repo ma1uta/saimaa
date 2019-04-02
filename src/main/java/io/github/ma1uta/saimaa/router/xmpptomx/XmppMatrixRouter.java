@@ -16,10 +16,10 @@
 
 package io.github.ma1uta.saimaa.router.xmpptomx;
 
-import io.github.ma1uta.saimaa.AbstractRouter;
 import io.github.ma1uta.saimaa.module.helpers.IdHelper;
 import io.github.ma1uta.saimaa.module.matrix.MatrixModule;
 import io.github.ma1uta.saimaa.module.xmpp.XmppModule;
+import io.github.ma1uta.saimaa.router.AbstractRouter;
 import org.jdbi.v3.core.Jdbi;
 
 import javax.annotation.PostConstruct;

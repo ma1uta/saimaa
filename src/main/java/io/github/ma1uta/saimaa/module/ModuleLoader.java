@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
+package io.github.ma1uta.saimaa.module;
 
 import io.github.ma1uta.saimaa.module.activitypub.ActivityPubConfig;
 import io.github.ma1uta.saimaa.module.activitypub.ActivityPubModule;
@@ -39,11 +39,11 @@ public class ModuleLoader extends ElementLoaderBase<Module<?>> {
         C.List<Module<?>> modules = C.newList();
         modules.add(genie.get(MatrixModule.class));
 
-        if (genie.get(XmppConfig.class) != null) {
+        if (genie.hasProvider(XmppConfig.class)) {
             modules.add(genie.get(XmppModule.class));
         }
 
-        if (genie.get(ActivityPubConfig.class) != null) {
+        if (genie.hasProvider(ActivityPubConfig.class)) {
             modules.add(genie.get(ActivityPubModule.class));
         }
 

@@ -22,12 +22,12 @@ import io.github.ma1uta.matrix.client.factory.jaxrs.AppJaxRsRequestFactory;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.support.jackson.JacksonContextResolver;
 import io.github.ma1uta.saimaa.Loggers;
-import io.github.ma1uta.saimaa.Module;
 import io.github.ma1uta.saimaa.RouterFactory;
 import io.github.ma1uta.saimaa.config.Cert;
 import io.github.ma1uta.saimaa.db.matrix.UserDao;
 import io.github.ma1uta.saimaa.jaxrs.netty.JerseyServerInitializer;
 import io.github.ma1uta.saimaa.jaxrs.netty.NettyHttpContainer;
+import io.github.ma1uta.saimaa.module.Module;
 import io.github.ma1uta.saimaa.netty.NettyBuilder;
 import io.netty.channel.Channel;
 import io.netty.handler.ssl.SslContext;
@@ -38,7 +38,6 @@ import java.net.URI;
 import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
@@ -65,14 +64,6 @@ public class MatrixModule implements Module<MatrixConfig> {
     private Jdbi jdbi;
     @Inject
     private RouterFactory routerFactory;
-
-    @PostConstruct
-    private void init() throws Exception {
-        initMatrixClient();
-        initMasterBot();
-        initRestAPI();
-        initSSL();
-    }
 
     private void initMatrixClient() throws Exception {
         ClientBuilder clientBuilder = ClientBuilder.newBuilder().register(new JacksonContextResolver());
@@ -135,7 +126,12 @@ public class MatrixModule implements Module<MatrixConfig> {
     }
 
     @Override
-    public void run() {
+    public void run() throws Exception {
+        initMatrixClient();
+        initMasterBot();
+        initRestAPI();
+        initSSL();
+
         URI uri = URI.create(getConfig().getUrl());
 
         NettyHttpContainer container = new NettyHttpContainer(matrixApp);

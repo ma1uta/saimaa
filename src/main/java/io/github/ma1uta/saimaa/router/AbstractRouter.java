@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa;
+package io.github.ma1uta.saimaa.router;
 
+import io.github.ma1uta.saimaa.Loggers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

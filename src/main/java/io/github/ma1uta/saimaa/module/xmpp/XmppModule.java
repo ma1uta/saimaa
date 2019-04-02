@@ -16,9 +16,9 @@
 
 package io.github.ma1uta.saimaa.module.xmpp;
 
-import io.github.ma1uta.saimaa.Module;
 import io.github.ma1uta.saimaa.RouterFactory;
 import io.github.ma1uta.saimaa.config.Cert;
+import io.github.ma1uta.saimaa.module.Module;
 import io.github.ma1uta.saimaa.module.matrix.MatrixModule;
 import io.github.ma1uta.saimaa.module.xmpp.dialback.ServerDialback;
 import io.github.ma1uta.saimaa.module.xmpp.netty.XmppServerInitializer;
@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
@@ -183,14 +182,6 @@ public class XmppModule implements Module<XmppConfig> {
         return sessions != null && !sessions.isEmpty() ? sessions.iterator().next() : null;
     }
 
-    @PostConstruct
-    private void init() throws Exception {
-        this.dialback = new ServerDialback(this);
-        initSSL(config);
-        initRouters();
-        initDnsResolver();
-    }
-
     private void initDnsResolver() {
         this.srvNameResolver = new SrvNameResolver();
     }
@@ -221,7 +212,12 @@ public class XmppModule implements Module<XmppConfig> {
     }
 
     @Override
-    public void run() {
+    public void run() throws Exception {
+        this.dialback = new ServerDialback(this);
+        initSSL(config);
+        initRouters();
+        initDnsResolver();
+
         this.channel = NettyBuilder.createServer(config.getDomain(), config.getPort(), new XmppServerInitializer(this), null);
     }
 
