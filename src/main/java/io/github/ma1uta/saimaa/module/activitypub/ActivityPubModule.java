@@ -16,8 +16,6 @@
 
 package io.github.ma1uta.saimaa.module.activitypub;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.ma1uta.saimaa.Bridge;
 import io.github.ma1uta.saimaa.Module;
 import io.github.ma1uta.saimaa.jaxrs.netty.JerseyServerInitializer;
 import io.github.ma1uta.saimaa.jaxrs.netty.NettyHttpContainer;
@@ -28,8 +26,10 @@ import org.jdbi.v3.core.Jdbi;
 
 import java.net.URI;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 /**
  * ActivityPub module.
@@ -41,8 +41,11 @@ public class ActivityPubModule implements Module<ActivityPubConfig> {
      */
     public static final String NAME = "activitypub";
 
+    @Inject
     private ActivityPubConfig apConfig;
+    @Inject
     private Jdbi jdbi;
+
     private ActivityPubApp app;
     private Channel channel;
     private SslContext sslContext;
@@ -52,12 +55,8 @@ public class ActivityPubModule implements Module<ActivityPubConfig> {
         return NAME;
     }
 
-    @Override
-    public void init(Map config, Bridge bridge) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        this.apConfig = mapper.convertValue(config, ActivityPubConfig.class);
-        this.jdbi = bridge.getJdbi();
-
+    @PostConstruct
+    private void init() throws Exception {
         Set<Object> resources = new HashSet<>();
         resources.add(new WebfingerResource(this.jdbi, this.apConfig));
         resources.add(new ActivityPubResource(this.jdbi, this.apConfig));
@@ -84,6 +83,7 @@ public class ActivityPubModule implements Module<ActivityPubConfig> {
         return this.apConfig;
     }
 
+    @PreDestroy
     @Override
     public void close() throws Exception {
         channel.close().sync();

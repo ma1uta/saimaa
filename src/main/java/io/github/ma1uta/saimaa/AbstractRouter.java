@@ -51,13 +51,4 @@ public abstract class AbstractRouter {
      * @throws Exception when processing was failed.
      */
     public abstract boolean process(Object message) throws Exception;
-
-    /**
-     * Initialize router.
-     *
-     * @param bridge appservice.
-     * @param source source module.
-     * @param target target module.
-     */
-    public abstract void init(Bridge bridge, Module source, Module target);
 }

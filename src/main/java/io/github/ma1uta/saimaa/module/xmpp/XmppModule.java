@@ -16,8 +16,6 @@
 
 package io.github.ma1uta.saimaa.module.xmpp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.ma1uta.saimaa.Bridge;
 import io.github.ma1uta.saimaa.Module;
 import io.github.ma1uta.saimaa.RouterFactory;
 import io.github.ma1uta.saimaa.config.Cert;
@@ -44,12 +42,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
 
 /**
  * XMPP server with S2S support.
  */
-public class XmppModule implements Module {
+public class XmppModule implements Module<XmppConfig> {
 
     /**
      * Module name.
@@ -63,12 +64,16 @@ public class XmppModule implements Module {
      */
     static final int DEFAULT_S2S_PORT = 5269;
 
+    @Inject
+    private Jdbi jdbi;
+    @Inject
+    private XmppConfig config;
+    @Inject
+    private RouterFactory routerFactory;
+
     private final Map<InetSocketAddress, Set<IncomingSession>> incoming = new ConcurrentHashMap<>();
     private final Map<String, Set<OutgoingSession>> outgoing = new ConcurrentHashMap<>();
     private ServerDialback dialback;
-    private Jdbi jdbi;
-    private XmppConfig config;
-    private RouterFactory routerFactory;
     private SSLContext sslContext;
     private Channel channel;
     private SrvNameResolver srvNameResolver;
@@ -130,6 +135,7 @@ public class XmppModule implements Module {
         return config;
     }
 
+    @PreDestroy
     @Override
     public void close() throws Exception {
         List<Session> sessionsToRemove = new ArrayList<>();
@@ -177,16 +183,10 @@ public class XmppModule implements Module {
         return sessions != null && !sessions.isEmpty() ? sessions.iterator().next() : null;
     }
 
-    @Override
-    public void init(Map config, Bridge bridge) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        XmppConfig xmppConfig = mapper.convertValue(config, XmppConfig.class);
-
-        this.jdbi = bridge.getJdbi();
-        this.config = xmppConfig;
-        this.routerFactory = bridge.getRouterFactory();
+    @PostConstruct
+    private void init() throws Exception {
         this.dialback = new ServerDialback(this);
-        initSSL(xmppConfig);
+        initSSL(config);
         initRouters();
         initDnsResolver();
     }

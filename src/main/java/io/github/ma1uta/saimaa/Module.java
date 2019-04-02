@@ -16,8 +16,6 @@
 
 package io.github.ma1uta.saimaa;
 
-import java.util.Map;
-
 /**
  * Module.
  *
@@ -31,15 +29,6 @@ public interface Module<C> extends AutoCloseable {
      * @return module name.
      */
     String getName();
-
-    /**
-     * Initialize module.
-     *
-     * @param config configuration.
-     * @param bridge bridge.
-     * @throws Exception when initialization was failed.
-     */
-    void init(Map config, Bridge bridge) throws Exception;
 
     /**
      * Run module.

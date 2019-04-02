@@ -19,8 +19,6 @@ package io.github.ma1uta.saimaa.router.mxtoxmpp;
 import io.github.ma1uta.matrix.event.RoomMessage;
 import io.github.ma1uta.matrix.event.content.RoomMessageContent;
 import io.github.ma1uta.matrix.event.message.Text;
-import io.github.ma1uta.saimaa.Bridge;
-import io.github.ma1uta.saimaa.Module;
 import io.github.ma1uta.saimaa.db.xmpp.DirectRoom;
 import io.github.ma1uta.saimaa.db.xmpp.RoomDao;
 import io.github.ma1uta.saimaa.module.matrix.converter.TextConverter;
@@ -31,6 +29,7 @@ import rocks.xmpp.core.stanza.model.server.ServerMessage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
+import javax.annotation.PostConstruct;
 
 /**
  * Matrix to XMPP message router.
@@ -82,9 +81,9 @@ public class MatrixXmppMessageRouter extends MatrixXmppRouter {
         });
     }
 
-    @Override
-    public void init(Bridge bridge, Module source, Module target) {
-        super.init(bridge, source, target);
+    @PostConstruct
+    protected void init() {
+        super.init();
         converters.put(Text.class, new TextConverter());
     }
 }

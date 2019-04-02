@@ -16,13 +16,8 @@
 
 package io.github.ma1uta.saimaa;
 
-import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.ma1uta.saimaa.config.AppConfig;
-import io.github.ma1uta.saimaa.config.DatabaseConfig;
-import io.github.ma1uta.saimaa.module.activitypub.ActivityPubModule;
-import io.github.ma1uta.saimaa.module.matrix.MatrixModule;
-import io.github.ma1uta.saimaa.module.xmpp.XmppModule;
 import io.github.ma1uta.saimaa.router.mxtoxmpp.MatrixXmppDirectInviteRouter;
 import io.github.ma1uta.saimaa.router.mxtoxmpp.MatrixXmppMessageRouter;
 import io.github.ma1uta.saimaa.router.xmpptomx.XmppMatrixDirectInviteRouter;
@@ -33,9 +28,8 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.FileSystemResourceAccessor;
-import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.postgres.PostgresPlugin;
-import org.jdbi.v3.sqlobject.SqlObjectPlugin;
+import org.osgl.inject.annotation.LoadCollection;
+import org.osgl.inject.annotation.MapKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +37,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Inject;
 
 /**
  * Matrix-XMPP bridge.
@@ -51,23 +46,26 @@ public class Bridge {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Loggers.LOGGER);
 
+    @Inject
+    private AppConfig config;
+
+    @Inject
     private HikariDataSource dataSource;
-    private Jdbi jdbi;
+
+    @Inject
     private RouterFactory routerFactory;
 
-    private LinkedHashMap<String, Module> modules = new LinkedHashMap<>();
+    @MapKey("getName")
+    @LoadCollection(ModuleLoader.class)
+    private LinkedHashMap<String, Module> modules;
 
     /**
      * Run bridge with the specified configuration.
      *
-     * @param config bridge configuration.
      * @throws Exception when failed run the bridge.
      */
-    public void run(AppConfig config) throws Exception {
-        initDatabase(config.getDatabase());
-        this.routerFactory = new RouterFactory();
-        initModules(config);
-
+    public void run() throws Exception {
+        updateSchema();
         initRouters();
 
         modules.values().forEach(Module::run);
@@ -84,28 +82,6 @@ public class Bridge {
         }));
     }
 
-    private void initModules(AppConfig config) throws Exception {
-        Module module = new MatrixModule();
-        module.init(config.getMatrix(), this);
-        modules.put(MatrixModule.NAME, module);
-
-        for (Map.Entry<String, Map> moduleItem : config.getModule().entrySet()) {
-            String moduleName = moduleItem.getKey();
-            switch (moduleName) {
-                case XmppModule.NAME:
-                    module = new XmppModule();
-                    break;
-                case ActivityPubModule.NAME:
-                    module = new ActivityPubModule();
-                    break;
-                default:
-                    throw new IllegalArgumentException(String.format("Unknown module: '%s'", moduleName));
-            }
-            module.init(moduleItem.getValue(), this);
-            modules.put(moduleName, module);
-        }
-    }
-
     private void initRouters() {
         List<AbstractRouter> availableRouters = Arrays.asList(
             // Matrix -> XMPP
@@ -120,27 +96,11 @@ public class Bridge {
             for (Map.Entry<String, Module> target : modules.entrySet()) {
                 for (AbstractRouter router : availableRouters) {
                     if (router.canProcess(source.getKey(), target.getKey())) {
-                        router.init(this, source.getValue(), target.getValue());
                         this.routerFactory.addModuleRouter(source.getKey(), target.getKey(), router);
                     }
                 }
             }
         }
-    }
-
-    private void initDatabase(DatabaseConfig config) throws Exception {
-        HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setDriverClassName(config.getDriverClass());
-        hikariConfig.setJdbcUrl(config.getUrl());
-        hikariConfig.setUsername(config.getUsername());
-        hikariConfig.setPassword(config.getPassword());
-        config.getProperties().forEach(hikariConfig::addDataSourceProperty);
-
-        dataSource = new HikariDataSource(hikariConfig);
-        jdbi = Jdbi.create(dataSource);
-        jdbi.installPlugin(new SqlObjectPlugin());
-        jdbi.installPlugin(new PostgresPlugin());
-        updateSchema();
     }
 
     private void updateSchema() throws Exception {
@@ -149,13 +109,5 @@ public class Bridge {
         Liquibase liquibase = new Liquibase(getClass().getResource("/migrations.xml").getFile(), new FileSystemResourceAccessor(),
             database);
         liquibase.update(new Contexts(), new LabelExpression());
-    }
-
-    public Jdbi getJdbi() {
-        return jdbi;
-    }
-
-    public RouterFactory getRouterFactory() {
-        return routerFactory;
     }
 }

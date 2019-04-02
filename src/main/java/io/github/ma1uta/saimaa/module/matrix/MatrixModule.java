@@ -16,13 +16,11 @@
 
 package io.github.ma1uta.saimaa.module.matrix;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.AppServiceClient;
 import io.github.ma1uta.matrix.client.factory.jaxrs.AppJaxRsRequestFactory;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.support.jackson.JacksonContextResolver;
-import io.github.ma1uta.saimaa.Bridge;
 import io.github.ma1uta.saimaa.Loggers;
 import io.github.ma1uta.saimaa.Module;
 import io.github.ma1uta.saimaa.RouterFactory;
@@ -39,8 +37,10 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.security.SecureRandom;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.ClientBuilder;
 
@@ -57,20 +57,17 @@ public class MatrixModule implements Module<MatrixConfig> {
     private MatrixApp matrixApp;
     private AppServiceClient matrixClient;
     private SslContext sslContext;
-    private MatrixConfig config;
-    private Jdbi jdbi;
-    private RouterFactory routerFactory;
     private Channel channel;
 
-    @Override
-    public void init(Map config, Bridge bridge) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        MatrixConfig matrixConfig = mapper.convertValue(config, MatrixConfig.class);
+    @Inject
+    private MatrixConfig config;
+    @Inject
+    private Jdbi jdbi;
+    @Inject
+    private RouterFactory routerFactory;
 
-        this.jdbi = bridge.getJdbi();
-        this.config = matrixConfig;
-        this.routerFactory = bridge.getRouterFactory();
-
+    @PostConstruct
+    private void init() throws Exception {
         initMatrixClient();
         initMasterBot();
         initRestAPI();
@@ -147,6 +144,7 @@ public class MatrixModule implements Module<MatrixConfig> {
             f -> container.getApplicationHandler().onShutdown(container));
     }
 
+    @PreDestroy
     @Override
     public void close() throws Exception {
         channel.close().sync();
