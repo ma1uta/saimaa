@@ -19,26 +19,33 @@ package io.github.ma1uta.saimaa.router;
 import io.github.ma1uta.saimaa.router.mxtoxmpp.MatrixXmppDirectInviteRouter;
 import io.github.ma1uta.saimaa.router.mxtoxmpp.MatrixXmppMessageRouter;
 import io.github.ma1uta.saimaa.router.xmpptomx.XmppMatrixDirectInviteRouter;
-import org.osgl.inject.loader.TypedElementLoader;
+import org.osgl.Lang;
+import org.osgl.inject.BeanSpec;
+import org.osgl.inject.Genie;
+import org.osgl.inject.loader.ElementLoaderBase;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Router module.
  */
-public class RouterLoader extends TypedElementLoader<AbstractRouter> {
+public class RouterLoader extends ElementLoaderBase<AbstractRouter> {
 
     @Override
-    protected List<Class<? extends AbstractRouter>> load(Class<AbstractRouter> type, boolean loadNonPublic, boolean loadAbstract,
-                                                         boolean loadRoot) {
+    public Iterable<AbstractRouter> load(Map<String, Object> options, BeanSpec container, Genie genie) {
         return Arrays.asList(
             // Matrix -> XMPP
-            MatrixXmppDirectInviteRouter.class,
-            MatrixXmppMessageRouter.class,
+            genie.get(MatrixXmppDirectInviteRouter.class),
+            genie.get(MatrixXmppMessageRouter.class),
 
             // XMPP -> Matrix
-            XmppMatrixDirectInviteRouter.class
+            genie.get(XmppMatrixDirectInviteRouter.class)
         );
+    }
+
+    @Override
+    public Lang.Function<AbstractRouter, Boolean> filter(Map<String, Object> options, BeanSpec container) {
+        return x -> true;
     }
 }

@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 
@@ -59,7 +60,7 @@ public class Bridge {
     private LinkedHashMap<String, Module> modules;
 
     @LoadCollection(RouterLoader.class)
-    private Iterable<AbstractRouter> routers;
+    private List<AbstractRouter> routers;
 
     /**
      * Run bridge with the specified configuration.
