@@ -27,7 +27,6 @@ import org.jdbi.v3.core.Jdbi;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 /**
@@ -79,7 +78,6 @@ public class ActivityPubModule implements Module<ActivityPubConfig> {
         return this.apConfig;
     }
 
-    @PreDestroy
     @Override
     public void close() throws Exception {
         channel.close().sync();

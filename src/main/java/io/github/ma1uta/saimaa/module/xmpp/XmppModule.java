@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
 
@@ -134,7 +133,6 @@ public class XmppModule implements Module<XmppConfig> {
         return config;
     }
 
-    @PreDestroy
     @Override
     public void close() throws Exception {
         List<Session> sessionsToRemove = new ArrayList<>();

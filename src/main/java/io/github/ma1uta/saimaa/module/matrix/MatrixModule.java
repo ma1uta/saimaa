@@ -38,7 +38,6 @@ import java.net.URI;
 import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
 import javax.ws.rs.client.ClientBuilder;
@@ -140,7 +139,6 @@ public class MatrixModule implements Module<MatrixConfig> {
             f -> container.getApplicationHandler().onShutdown(container));
     }
 
-    @PreDestroy
     @Override
     public void close() throws Exception {
         channel.close().sync();
