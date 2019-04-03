@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import javax.inject.Inject;
 
 /**
  * Id helper.
@@ -34,13 +35,10 @@ public class IdHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Loggers.LOGGER);
 
-    private final MatrixConfig matrixConfig;
-    private final XmppConfig xmppConfig;
-
-    public IdHelper(MatrixConfig matrixConfig, XmppConfig xmppConfig) {
-        this.matrixConfig = matrixConfig;
-        this.xmppConfig = xmppConfig;
-    }
+    @Inject
+    private MatrixConfig matrixConfig;
+    @Inject
+    private XmppConfig xmppConfig;
 
     public MatrixConfig getMatrixConfig() {
         return matrixConfig;

@@ -22,7 +22,6 @@ import io.github.ma1uta.saimaa.module.xmpp.XmppModule;
 import io.github.ma1uta.saimaa.router.AbstractRouter;
 import org.jdbi.v3.core.Jdbi;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 /**
@@ -32,6 +31,7 @@ public abstract class MatrixXmppRouter extends AbstractRouter {
 
     @Inject
     private Jdbi jdbi;
+    @Inject
     private IdHelper idHelper;
     @Inject
     private MatrixModule matrixModule;
@@ -41,11 +41,6 @@ public abstract class MatrixXmppRouter extends AbstractRouter {
     @Override
     public boolean canProcess(String from, String to) {
         return MatrixModule.NAME.equals(from) && XmppModule.NAME.equals(to);
-    }
-
-    @PostConstruct
-    protected void init() {
-        this.idHelper = new IdHelper(matrixModule.getConfig(), xmppModule.getConfig());
     }
 
     protected Jdbi getJdbi() {

@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.router;
+package io.github.ma1uta.saimaa.router.mxtoxmpp.converter;
 
-import io.github.ma1uta.saimaa.router.mxtoxmpp.MatrixXmppDirectInviteRouter;
-import io.github.ma1uta.saimaa.router.mxtoxmpp.MatrixXmppMessageRouter;
-import io.github.ma1uta.saimaa.router.xmpptomx.XmppMatrixDirectInviteRouter;
 import org.osgl.Lang;
 import org.osgl.inject.BeanSpec;
 import org.osgl.inject.Genie;
@@ -28,24 +25,19 @@ import org.osgl.util.C;
 import java.util.Map;
 
 /**
- * Router module.
+ * Message converters.
  */
-public class RouterLoader extends ElementLoaderBase<AbstractRouter> {
+public class ConverterLoader extends ElementLoaderBase<Converter> {
 
     @Override
-    public Iterable<AbstractRouter> load(Map<String, Object> options, BeanSpec container, Genie genie) {
+    public Iterable<Converter> load(Map<String, Object> options, BeanSpec container, Genie genie) {
         return C.newList(
-            // Matrix -> XMPP
-            genie.get(MatrixXmppDirectInviteRouter.class),
-            genie.get(MatrixXmppMessageRouter.class),
-
-            // XMPP -> Matrix
-            genie.get(XmppMatrixDirectInviteRouter.class)
+            genie.get(TextConverter.class)
         );
     }
 
     @Override
-    public Lang.Function<AbstractRouter, Boolean> filter(Map<String, Object> options, BeanSpec container) {
+    public Lang.Function<Converter, Boolean> filter(Map<String, Object> options, BeanSpec container) {
         return x -> true;
     }
 }
