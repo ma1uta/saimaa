@@ -18,7 +18,6 @@ package io.github.ma1uta.saimaa.module.matrix;
 
 import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.AppServiceClient;
-import io.github.ma1uta.matrix.client.factory.jaxrs.AppJaxRsRequestFactory;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.support.jackson.JacksonContextResolver;
 import io.github.ma1uta.saimaa.Loggers;
@@ -35,12 +34,9 @@ import org.jdbi.v3.core.Jdbi;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.Set;
 import javax.inject.Inject;
-import javax.net.ssl.SSLContext;
-import javax.ws.rs.client.ClientBuilder;
 
 /**
  * All Matrix endpoints.
@@ -53,7 +49,6 @@ public class MatrixModule implements Module<MatrixConfig> {
     public static final String NAME = "matrix";
 
     private MatrixApp matrixApp;
-    private AppServiceClient matrixClient;
     private SslContext sslContext;
     private Channel channel;
 
@@ -63,21 +58,8 @@ public class MatrixModule implements Module<MatrixConfig> {
     private Jdbi jdbi;
     @Inject
     private RouterFactory routerFactory;
-
-    private void initMatrixClient() throws Exception {
-        ClientBuilder clientBuilder = ClientBuilder.newBuilder().register(new JacksonContextResolver());
-        MatrixConfig config = getConfig();
-        if (config.isDisableSslValidation()) {
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, Cert.TRUST_ALL_CERTS, new SecureRandom());
-            clientBuilder.sslContext(sslContext);
-        }
-        this.matrixClient = new AppServiceClient.Builder()
-            .requestFactory(new AppJaxRsRequestFactory(clientBuilder.build(), config.getHomeserver()))
-            .userId(config.getMasterUserId())
-            .accessToken(config.getAsToken())
-            .build();
-    }
+    @Inject
+    private AppServiceClient matrixClient;
 
     private void initMasterBot() {
         try {
@@ -126,7 +108,6 @@ public class MatrixModule implements Module<MatrixConfig> {
 
     @Override
     public void run() throws Exception {
-        initMatrixClient();
         initMasterBot();
         initRestAPI();
         initSSL();

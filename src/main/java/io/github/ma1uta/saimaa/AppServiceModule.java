@@ -20,7 +20,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.github.ma1uta.matrix.client.AppServiceClient;
+import io.github.ma1uta.matrix.client.factory.jaxrs.AppJaxRsRequestFactory;
+import io.github.ma1uta.matrix.support.jackson.JacksonContextResolver;
 import io.github.ma1uta.saimaa.config.AppConfig;
+import io.github.ma1uta.saimaa.config.Cert;
 import io.github.ma1uta.saimaa.config.DatabaseConfig;
 import io.github.ma1uta.saimaa.module.activitypub.ActivityPubConfig;
 import io.github.ma1uta.saimaa.module.activitypub.ActivityPubModule;
@@ -30,14 +34,23 @@ import io.github.ma1uta.saimaa.module.xmpp.XmppModule;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.postgres.PostgresPlugin;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Map;
+import javax.net.ssl.SSLContext;
 import javax.sql.DataSource;
+import javax.ws.rs.client.ClientBuilder;
 
 /**
  * Main appservice module for IoC.
  */
 public class AppServiceModule extends org.osgl.inject.Module {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Loggers.LOGGER);
 
     private final AppConfig config;
 
@@ -85,6 +98,23 @@ public class AppServiceModule extends org.osgl.inject.Module {
                 default:
                     // nothing
             }
+        }
+
+        try {
+            ClientBuilder clientBuilder = ClientBuilder.newBuilder().register(new JacksonContextResolver());
+            if (matrixConfig.isDisableSslValidation()) {
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, Cert.TRUST_ALL_CERTS, new SecureRandom());
+                clientBuilder.sslContext(sslContext);
+            }
+            bind(AppServiceClient.class).to(new AppServiceClient.Builder()
+                .requestFactory(new AppJaxRsRequestFactory(clientBuilder.build(), matrixConfig.getHomeserver()))
+                .userId(matrixConfig.getMasterUserId())
+                .accessToken(matrixConfig.getAsToken())
+                .build());
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            LOGGER.error("Unable to initialize Matrix client", e);
+            throw new IllegalStateException(e);
         }
     }
 }

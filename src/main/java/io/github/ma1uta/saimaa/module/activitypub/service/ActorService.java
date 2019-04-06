@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.saimaa.module.activitypub.service;
 
+import io.github.ma1uta.matrix.client.AppServiceClient;
 import io.github.ma1uta.saimaa.Loggers;
 import io.github.ma1uta.saimaa.RouterFactory;
 import io.github.ma1uta.saimaa.module.activitypub.ActivityPubConfig;
@@ -53,6 +54,8 @@ public class ActorService {
     private ActivityPubConfig config;
     @Inject
     private RouterFactory routerFactory;
+    @Inject
+    private AppServiceClient mxClient;
 
     /**
      * Get actor info.
