@@ -18,8 +18,8 @@ package io.github.ma1uta.saimaa.router.mxtoxmpp;
 
 import io.github.ma1uta.matrix.event.RoomMember;
 import io.github.ma1uta.matrix.event.content.RoomMemberContent;
-import io.github.ma1uta.saimaa.db.xmpp.DirectRoom;
-import io.github.ma1uta.saimaa.db.xmpp.RoomDao;
+import io.github.ma1uta.saimaa.module.xmpp.db.DirectRoom;
+import io.github.ma1uta.saimaa.module.xmpp.db.RoomDao;
 import rocks.xmpp.addr.Jid;
 import rocks.xmpp.core.stanza.model.Presence;
 import rocks.xmpp.core.stanza.model.server.ServerPresence;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.db.xmpp;
+package io.github.ma1uta.saimaa.module.xmpp.db;
 
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;

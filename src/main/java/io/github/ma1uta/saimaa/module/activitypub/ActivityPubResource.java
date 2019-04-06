@@ -125,6 +125,9 @@ public class ActivityPubResource {
         CompletableFuture.runAsync(() -> {
             try {
                 asyncResponse.resume(actorService.getFollowers(username, page));
+            } catch (NotFoundException e) {
+                LOGGER.error(String.format("Actor '%s' doesn't exist", username), e);
+                asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
             } catch (Exception e) {
                 LOGGER.error(String.format("Failed to get followers '%s', page '%s'", username, page), e);
                 asyncResponse.resume(Response.serverError().build());
@@ -146,6 +149,9 @@ public class ActivityPubResource {
         CompletableFuture.runAsync(() -> {
             try {
                 asyncResponse.resume(actorService.getFollowing(username, page));
+            } catch (NotFoundException e) {
+                LOGGER.error(String.format("Actor '%s' doesn't exist", username), e);
+                asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
             } catch (Exception e) {
                 LOGGER.error(String.format("Failed to get followers '%s', page '%s'", username, page), e);
                 asyncResponse.resume(Response.serverError().build());

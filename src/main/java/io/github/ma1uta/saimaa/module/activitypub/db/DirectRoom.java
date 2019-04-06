@@ -14,42 +14,40 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.db.matrix;
-
-import java.time.LocalDateTime;
+package io.github.ma1uta.saimaa.module.activitypub.db;
 
 /**
- * Appservice transaction.
+ * Direct messages room.
  */
-public class Transaction {
+public class DirectRoom {
 
-    private String id;
+    private String roomId;
 
-    private LocalDateTime started;
+    private String mxid;
 
-    private LocalDateTime processed;
+    private String apUser;
 
-    public String getId() {
-        return id;
+    public String getRoomId() {
+        return roomId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 
-    public LocalDateTime getStarted() {
-        return started;
+    public String getMxid() {
+        return mxid;
     }
 
-    public void setStarted(LocalDateTime started) {
-        this.started = started;
+    public void setMxid(String mxid) {
+        this.mxid = mxid;
     }
 
-    public LocalDateTime getProcessed() {
-        return processed;
+    public String getApUser() {
+        return apUser;
     }
 
-    public void setProcessed(LocalDateTime processed) {
-        this.processed = processed;
+    public void setApUser(String apUser) {
+        this.apUser = apUser;
     }
 }

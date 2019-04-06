@@ -20,9 +20,9 @@ import io.github.ma1uta.matrix.Id;
 import io.github.ma1uta.matrix.client.AppServiceClient;
 import io.github.ma1uta.matrix.client.model.account.RegisterRequest;
 import io.github.ma1uta.matrix.client.model.room.CreateRoomRequest;
-import io.github.ma1uta.saimaa.db.matrix.UserDao;
-import io.github.ma1uta.saimaa.db.xmpp.DirectRoom;
-import io.github.ma1uta.saimaa.db.xmpp.RoomDao;
+import io.github.ma1uta.saimaa.module.matrix.db.UserDao;
+import io.github.ma1uta.saimaa.module.xmpp.db.DirectRoom;
+import io.github.ma1uta.saimaa.module.xmpp.db.RoomDao;
 import rocks.xmpp.addr.Jid;
 import rocks.xmpp.core.stanza.model.Presence;
 

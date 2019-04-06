@@ -18,8 +18,8 @@ package io.github.ma1uta.saimaa.router.mxtoxmpp;
 
 import io.github.ma1uta.matrix.event.RoomMessage;
 import io.github.ma1uta.matrix.event.content.RoomMessageContent;
-import io.github.ma1uta.saimaa.db.xmpp.DirectRoom;
-import io.github.ma1uta.saimaa.db.xmpp.RoomDao;
+import io.github.ma1uta.saimaa.module.xmpp.db.DirectRoom;
+import io.github.ma1uta.saimaa.module.xmpp.db.RoomDao;
 import io.github.ma1uta.saimaa.router.mxtoxmpp.converter.Converter;
 import io.github.ma1uta.saimaa.router.mxtoxmpp.converter.ConverterLoader;
 import org.osgl.inject.annotation.LoadCollection;

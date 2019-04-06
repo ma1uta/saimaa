@@ -14,25 +14,40 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.db.activitypub;
-
-import org.jdbi.v3.core.mapper.RowMapper;
-import org.jdbi.v3.core.statement.StatementContext;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
+package io.github.ma1uta.saimaa.module.activitypub.db;
 
 /**
- * ACtor row mapper.
+ * ActivityPub note.
  */
-public class ActorRowMapper implements RowMapper<Actor> {
+public class Note {
 
-    @Override
-    public Actor map(ResultSet rs, StatementContext ctx) throws SQLException {
-        Actor actor = new Actor();
-        actor.setMxid(rs.getString("mxid"));
-        actor.setRoomId(rs.getString("room_id"));
-        actor.setGroup(rs.getBoolean("group"));
-        return actor;
+    private Long id;
+
+    private String eventId;
+
+    private String username;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

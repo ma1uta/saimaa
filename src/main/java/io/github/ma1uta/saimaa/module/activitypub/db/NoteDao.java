@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.db.matrix;
+package io.github.ma1uta.saimaa.module.activitypub.db;
 
 /**
- * Matrix appuser.
+ * Note dao.
  */
-public class AppUser {
-
-    private String localpart;
-
-    public String getLocalpart() {
-        return localpart;
-    }
-
-    public void setLocalpart(String localpart) {
-        this.localpart = localpart;
-    }
+public interface NoteDao {
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.db.activitypub;
+package io.github.ma1uta.saimaa.module.activitypub.db;
 
 import org.jdbi.v3.sqlobject.config.RegisterRowMapper;
 import org.jdbi.v3.sqlobject.customizer.Bind;

@@ -17,9 +17,10 @@
 package io.github.ma1uta.saimaa.module.activitypub.service;
 
 import io.github.ma1uta.saimaa.Loggers;
-import io.github.ma1uta.saimaa.db.activitypub.Actor;
-import io.github.ma1uta.saimaa.db.activitypub.ActorDao;
+import io.github.ma1uta.saimaa.RouterFactory;
 import io.github.ma1uta.saimaa.module.activitypub.ActivityPubConfig;
+import io.github.ma1uta.saimaa.module.activitypub.db.Actor;
+import io.github.ma1uta.saimaa.module.activitypub.db.ActorDao;
 import io.github.ma1uta.saimaa.module.activitypub.model.actor.Group;
 import io.github.ma1uta.saimaa.module.activitypub.model.actor.Person;
 import io.github.ma1uta.saimaa.module.activitypub.model.core.OrderedCollection;
@@ -50,6 +51,8 @@ public class ActorService {
     private Jdbi jdbi;
     @Inject
     private ActivityPubConfig config;
+    @Inject
+    private RouterFactory routerFactory;
 
     /**
      * Get actor info.
@@ -100,9 +103,10 @@ public class ActorService {
      * @param pageNumberStr page number of the followers.
      * @return actor followers.
      * @throws InternalServerErrorException when failed to get followers.
+     * @throws NotFoundException            when username doesn't exist.
      */
-    public OrderedCollection getFollowers(String username, String pageNumberStr) throws InternalServerErrorException {
-        return friends(username, pageNumberStr, "followers", ActorDao::countFollowers, ActorDao::getFollowers);
+    public OrderedCollection getFollowers(String username, String pageNumberStr) throws InternalServerErrorException, NotFoundException {
+        return collection(username, pageNumberStr, "followers", ActorDao::countFollowers, ActorDao::getFollowers);
     }
 
     /**
@@ -112,15 +116,36 @@ public class ActorService {
      * @param pageNumberStr page number of the following.
      * @return actor followers.
      * @throws InternalServerErrorException when failed to get following.
+     * @throws NotFoundException            when username doesn't exist.
      */
-    public OrderedCollection getFollowing(String username, String pageNumberStr) throws InternalServerErrorException {
-        return friends(username, pageNumberStr, "following", ActorDao::countFollowing, ActorDao::getFollowing);
+    public OrderedCollection getFollowing(String username, String pageNumberStr) throws InternalServerErrorException, NotFoundException {
+        return collection(username, pageNumberStr, "following", ActorDao::countFollowing, ActorDao::getFollowing);
     }
 
-    protected OrderedCollection friends(String username, String pageNumberStr, String type, CountFriends countFriends,
-                                        GetFriends getFriends) throws InternalServerErrorException {
+    protected OrderedCollection collection(String username, String pageNumberStr, String type, CountMethod countMethod,
+                                           GetMethod getMethod) throws InternalServerErrorException, NotFoundException {
         try {
             return jdbi.inTransaction(h -> {
+                ActorDao dao = h.attach(ActorDao.class);
+
+                Actor actor = dao.findByUsername(username);
+
+                if (actor == null) {
+                    throw new NotFoundException();
+                }
+
+                String preparedUrl = config.getPreparedUrl();
+
+                OrderedCollectionPage page = new OrderedCollectionPage();
+                page.setProcessingContext(ACTIVITY_STREAMS);
+                long countFollowers = countMethod.count(dao, username);
+                page.setTotalItems(countFollowers);
+                if (pageNumberStr == null) {
+                    page.setId(String.format("%s%s/%s", preparedUrl, username, type));
+                    page.setFirst(String.format("%s%s/%s?page=1", preparedUrl, username, type));
+                    return page;
+                }
+
                 long offset = 0;
                 long pageNumber = 1;
                 try {
@@ -133,14 +158,7 @@ public class ActorService {
                     LOGGER.error(String.format("Wrong number: '%s'", pageNumberStr), e);
                 }
 
-                ActorDao dao = h.attach(ActorDao.class);
-                long countFollowers = countFriends.count(dao, username);
-                OrderedCollectionPage page = new OrderedCollectionPage();
-
-                page.setProcessingContext(ACTIVITY_STREAMS);
-                String preparedUrl = config.getPreparedUrl();
                 page.setId(String.format("%s%s/%s?page=%d", preparedUrl, username, type, pageNumber));
-                page.setTotalItems(countFollowers);
                 if (offset + config.getPageSize() < countFollowers) {
                     page.setNext(String.format("%s%s/%s?page=%d", preparedUrl, username, type, pageNumber + 1));
                 }
@@ -149,24 +167,39 @@ public class ActorService {
                 }
                 page.setPartOf(String.format("%s%s/%s", preparedUrl, username, type));
                 page.setOrderedItems(countFollowers > offset
-                    ? getFriends.get(dao, username, offset, config.getPageSize())
+                    ? getMethod.get(dao, username, offset, config.getPageSize())
                     : Collections.emptyList());
 
                 return page;
             });
         } catch (Exception e) {
             LOGGER.error(String.format("Unable to find %s: '%s'", type, username));
-            throw new InternalServerErrorException();
+            if (e instanceof NotFoundException) {
+                throw e;
+            } else {
+                throw new InternalServerErrorException(e);
+            }
         }
     }
 
+    /**
+     * Get outbox.
+     *
+     * @param username      actor username.
+     * @param pageNumberStr page number.
+     * @return outbox.
+     */
+    public OrderedCollection outbox(String username, String pageNumberStr) {
+        return null;
+    }
+
     @FunctionalInterface
-    interface CountFriends {
+    interface CountMethod {
         long count(ActorDao dao, String username);
     }
 
     @FunctionalInterface
-    interface GetFriends {
+    interface GetMethod {
         List<String> get(ActorDao dao, String username, long offset, long pageSize);
     }
 }

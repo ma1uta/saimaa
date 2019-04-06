@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.db.activitypub;
+package io.github.ma1uta.saimaa.module.xmpp.db;
 
 /**
- * Direct messages room.
+ * Multiuser chats.
  */
-public class DirectRoom {
+public class MultiUserRoom {
 
     private String roomId;
 
-    private String mxid;
+    private String roomAlias;
 
-    private String apUser;
+    private String conference;
 
     public String getRoomId() {
         return roomId;
@@ -35,19 +35,19 @@ public class DirectRoom {
         this.roomId = roomId;
     }
 
-    public String getMxid() {
-        return mxid;
+    public String getRoomAlias() {
+        return roomAlias;
     }
 
-    public void setMxid(String mxid) {
-        this.mxid = mxid;
+    public void setRoomAlias(String roomAlias) {
+        this.roomAlias = roomAlias;
     }
 
-    public String getApUser() {
-        return apUser;
+    public String getConference() {
+        return conference;
     }
 
-    public void setApUser(String apUser) {
-        this.apUser = apUser;
+    public void setConference(String conference) {
+        this.conference = conference;
     }
 }

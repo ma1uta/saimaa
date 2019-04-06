@@ -14,40 +14,42 @@
  * limitations under the License.
  */
 
-package io.github.ma1uta.saimaa.db.xmpp;
+package io.github.ma1uta.saimaa.module.matrix.db;
+
+import java.time.LocalDateTime;
 
 /**
- * Multiuser chats.
+ * Appservice transaction.
  */
-public class MultiUserRoom {
+public class Transaction {
 
-    private String roomId;
+    private String id;
 
-    private String roomAlias;
+    private LocalDateTime started;
 
-    private String conference;
+    private LocalDateTime processed;
 
-    public String getRoomId() {
-        return roomId;
+    public String getId() {
+        return id;
     }
 
-    public void setRoomId(String roomId) {
-        this.roomId = roomId;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getRoomAlias() {
-        return roomAlias;
+    public LocalDateTime getStarted() {
+        return started;
     }
 
-    public void setRoomAlias(String roomAlias) {
-        this.roomAlias = roomAlias;
+    public void setStarted(LocalDateTime started) {
+        this.started = started;
     }
 
-    public String getConference() {
-        return conference;
+    public LocalDateTime getProcessed() {
+        return processed;
     }
 
-    public void setConference(String conference) {
-        this.conference = conference;
+    public void setProcessed(LocalDateTime processed) {
+        this.processed = processed;
     }
 }

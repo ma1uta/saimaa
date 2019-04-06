@@ -17,9 +17,9 @@
 package io.github.ma1uta.saimaa.module.activitypub.service;
 
 import io.github.ma1uta.saimaa.Loggers;
-import io.github.ma1uta.saimaa.db.activitypub.Actor;
-import io.github.ma1uta.saimaa.db.activitypub.ActorDao;
 import io.github.ma1uta.saimaa.module.activitypub.ActivityPubConfig;
+import io.github.ma1uta.saimaa.module.activitypub.db.Actor;
+import io.github.ma1uta.saimaa.module.activitypub.db.ActorDao;
 import io.github.ma1uta.saimaa.module.activitypub.model.webfinger.Link;
 import io.github.ma1uta.saimaa.module.activitypub.model.webfinger.Resource;
 import org.jdbi.v3.core.Jdbi;
