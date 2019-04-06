@@ -39,4 +39,9 @@ public class Loggers {
      * Log other events.
      */
     public static final String LOGGER = "LOGGER";
+
+    /**
+     * ActivityPub logger.
+     */
+    public static final String AP_LOGGER = "AP_LOGGER";
 }

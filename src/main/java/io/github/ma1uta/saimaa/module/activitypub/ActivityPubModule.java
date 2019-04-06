@@ -22,7 +22,6 @@ import io.github.ma1uta.saimaa.module.Module;
 import io.github.ma1uta.saimaa.netty.NettyBuilder;
 import io.netty.channel.Channel;
 import io.netty.handler.ssl.SslContext;
-import org.jdbi.v3.core.Jdbi;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -42,9 +41,10 @@ public class ActivityPubModule implements Module<ActivityPubConfig> {
     @Inject
     private ActivityPubConfig apConfig;
     @Inject
-    private Jdbi jdbi;
+    private WebfingerResource webfingerResource;
+    @Inject
+    private ActivityPubResource activityPubResource;
 
-    private ActivityPubApp app;
     private Channel channel;
     private SslContext sslContext;
 
@@ -56,9 +56,9 @@ public class ActivityPubModule implements Module<ActivityPubConfig> {
     @Override
     public void run() throws Exception {
         Set<Object> resources = new HashSet<>();
-        resources.add(new WebfingerResource(this.jdbi, this.apConfig));
-        resources.add(new ActivityPubResource(this.jdbi, this.apConfig));
-        this.app = new ActivityPubApp(resources);
+        resources.add(webfingerResource);
+        resources.add(activityPubResource);
+        ActivityPubApp app = new ActivityPubApp(resources);
 
         if (this.apConfig.getSsl() != null) {
             this.sslContext = this.apConfig.getSsl().createNettyContext();

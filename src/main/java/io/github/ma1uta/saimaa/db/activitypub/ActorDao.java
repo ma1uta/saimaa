@@ -21,6 +21,8 @@ import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 
+import java.util.List;
+
 /**
  * Actor DAO.
  */
@@ -33,9 +35,12 @@ public interface ActorDao {
      * @param roomId   actor room id.
      * @param mxid     owner of the actor.
      * @param group    public or private actor.
+     * @param name     user name.
+     * @param icon     icon url.
      */
-    @SqlUpdate("insert into ap_actor(username, mxid, room_id, group) values(:username, :mxid, :roomId, :group)")
-    void create(@Bind("username") String username, @Bind("roomId") String roomId, @Bind("mxid") String mxid, @Bind("group") Boolean group);
+    @SqlUpdate("insert into ap_actor(username, mxid, room_id, group, name, icon) values(:username, :mxid, :roomId, :group, :name, :icon)")
+    void create(@Bind("username") String username, @Bind("roomId") String roomId, @Bind("mxid") String mxid, @Bind("group") Boolean group,
+                @Bind("name") String name, @Bind("icon") String icon);
 
     /**
      * Update the actor.
@@ -43,9 +48,12 @@ public interface ActorDao {
      * @param roomId actor room id.
      * @param mxid   owner of the actor.
      * @param group  public or private actor.
+     * @param name   user name.
+     * @param icon   icon url.
      */
-    @SqlUpdate("update ap_actor set mxid = :mxid, group = :group where room_id = :roomId")
-    void update(@Bind("roomId") String roomId, @Bind("mxid") String mxid, @Bind("group") Boolean group);
+    @SqlUpdate("update ap_actor set mxid = :mxid, group = :group, name = :name, icon = :icon where room_id = :roomId")
+    void update(@Bind("roomId") String roomId, @Bind("mxid") String mxid, @Bind("group") Boolean group, @Bind("name") String name,
+                @Bind("icon") String icon);
 
     /**
      * Find the actor by owner.
@@ -76,4 +84,15 @@ public interface ActorDao {
     @SqlQuery("select * from ap_actor where username = :username")
     @RegisterRowMapper(ActorRowMapper.class)
     Actor findByUsername(@Bind("username") String username);
+
+    /**
+     * Get followers.
+     *
+     * @param roomId actor room.
+     * @param offset how many followers skip.
+     * @param limit  how many followers return.
+     * @return followers.
+     */
+    @SqlQuery("select * from ap_followers where room_id = :roomId order by added limit :limit offset :offset")
+    List<String> getFollowers(@Bind("roomId") String roomId, @Bind("offset") long offset, @Bind("limit") long limit);
 }

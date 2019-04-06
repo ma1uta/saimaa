@@ -16,6 +16,7 @@
 
 package io.github.ma1uta.saimaa.module.activitypub;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.ma1uta.saimaa.config.Cert;
 
 /**
@@ -26,6 +27,9 @@ public class ActivityPubConfig {
     private String url;
 
     private Cert ssl;
+
+    @JsonIgnore
+    private String preparedUrl;
 
     public String getUrl() {
         return url;
@@ -41,5 +45,26 @@ public class ActivityPubConfig {
 
     public void setSsl(Cert ssl) {
         this.ssl = ssl;
+    }
+
+    /**
+     * Get prepared url (starts with schema and ends with slash).
+     *
+     * @return prepared url.
+     */
+    public String getPreparedUrl() {
+        if (preparedUrl == null) {
+            String url = getUrl();
+
+            String urlWithSchema;
+            if (url.startsWith("http://") || url.startsWith("https://")) {
+                urlWithSchema = url;
+            } else {
+                urlWithSchema = (getSsl() != null ? "https://" : "http://") + url;
+            }
+
+            this.preparedUrl = urlWithSchema.endsWith("/") ? urlWithSchema : urlWithSchema + "/";
+        }
+        return preparedUrl;
     }
 }

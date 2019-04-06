@@ -29,6 +29,10 @@ public class Actor {
 
     private Boolean group;
 
+    private String name;
+
+    private String icon;
+
     public String getUsername() {
         return username;
     }
@@ -59,5 +63,21 @@ public class Actor {
 
     public void setGroup(Boolean group) {
         this.group = group;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 }
