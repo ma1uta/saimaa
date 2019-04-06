@@ -43,7 +43,7 @@ public class Collection extends Contextable {
     private java.lang.Object last;
 
     @JsonDeserialize(using = ObjectDeserializer.class)
-    private List<java.lang.Object> items;
+    private List<?> items;
 
     @Override
     public String getType() {
@@ -82,11 +82,11 @@ public class Collection extends Contextable {
         this.last = last;
     }
 
-    public List<java.lang.Object> getItems() {
+    public List<?> getItems() {
         return items;
     }
 
-    public void setItems(List<java.lang.Object> items) {
+    public void setItems(List<?> items) {
         this.items = items;
     }
 }

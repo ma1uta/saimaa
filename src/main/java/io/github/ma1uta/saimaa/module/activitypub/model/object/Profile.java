@@ -28,18 +28,18 @@ public class Profile extends Object {
      */
     public static final String TYPE = "Profile";
 
-    private Object describes;
+    private java.lang.Object describes;
 
     @Override
     public String getType() {
         return TYPE;
     }
 
-    public Object getDescribes() {
+    public java.lang.Object getDescribes() {
         return describes;
     }
 
-    public void setDescribes(Object describes) {
+    public void setDescribes(java.lang.Object describes) {
         this.describes = describes;
     }
 }

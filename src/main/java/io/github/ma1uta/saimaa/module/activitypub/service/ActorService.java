@@ -16,14 +16,20 @@
 
 package io.github.ma1uta.saimaa.module.activitypub.service;
 
+import io.github.ma1uta.saimaa.Loggers;
 import io.github.ma1uta.saimaa.db.activitypub.Actor;
 import io.github.ma1uta.saimaa.db.activitypub.ActorDao;
 import io.github.ma1uta.saimaa.module.activitypub.ActivityPubConfig;
 import io.github.ma1uta.saimaa.module.activitypub.model.actor.Group;
 import io.github.ma1uta.saimaa.module.activitypub.model.actor.Person;
+import io.github.ma1uta.saimaa.module.activitypub.model.core.OrderedCollection;
+import io.github.ma1uta.saimaa.module.activitypub.model.core.OrderedCollectionPage;
 import org.jdbi.v3.core.Jdbi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
@@ -32,6 +38,13 @@ import javax.ws.rs.NotFoundException;
  * Actor service.
  */
 public class ActorService {
+
+    /**
+     * Activity Streams NS.
+     */
+    public static final String ACTIVITY_STREAMS = "https://www.w3.org/ns/activitystreams";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Loggers.AP_LOGGER);
 
     @Inject
     private Jdbi jdbi;
@@ -60,7 +73,7 @@ public class ActorService {
                 : new Person();
 
             String preparedUrl = config.getPreparedUrl();
-            response.setProcessingContext("https://www.w3.org/ns/activitystreams");
+            response.setProcessingContext(ACTIVITY_STREAMS);
             response.setId(preparedUrl + username);
             response.setPreferredUsername(username);
             response.setName(actor.getName());
@@ -78,5 +91,82 @@ public class ActorService {
                 throw new InternalServerErrorException(e);
             }
         }
+    }
+
+    /**
+     * Get actor followers.
+     *
+     * @param username      actor username.
+     * @param pageNumberStr page number of the followers.
+     * @return actor followers.
+     * @throws InternalServerErrorException when failed to get followers.
+     */
+    public OrderedCollection getFollowers(String username, String pageNumberStr) throws InternalServerErrorException {
+        return friends(username, pageNumberStr, "followers", ActorDao::countFollowers, ActorDao::getFollowers);
+    }
+
+    /**
+     * Get actor following.
+     *
+     * @param username      actor username.
+     * @param pageNumberStr page number of the following.
+     * @return actor followers.
+     * @throws InternalServerErrorException when failed to get following.
+     */
+    public OrderedCollection getFollowing(String username, String pageNumberStr) throws InternalServerErrorException {
+        return friends(username, pageNumberStr, "following", ActorDao::countFollowing, ActorDao::getFollowing);
+    }
+
+    protected OrderedCollection friends(String username, String pageNumberStr, String type, CountFriends countFriends,
+                                        GetFriends getFriends) throws InternalServerErrorException {
+        try {
+            return jdbi.inTransaction(h -> {
+                long offset = 0;
+                long pageNumber = 1;
+                try {
+                    pageNumber = Long.parseLong(pageNumberStr);
+                    if (pageNumber < 1) {
+                        pageNumber = 1;
+                    }
+                    offset = (pageNumber - 1) * config.getPageSize();
+                } catch (NumberFormatException e) {
+                    LOGGER.error(String.format("Wrong number: '%s'", pageNumberStr), e);
+                }
+
+                ActorDao dao = h.attach(ActorDao.class);
+                long countFollowers = countFriends.count(dao, username);
+                OrderedCollectionPage page = new OrderedCollectionPage();
+
+                page.setProcessingContext(ACTIVITY_STREAMS);
+                String preparedUrl = config.getPreparedUrl();
+                page.setId(String.format("%s%s/%s?page=%d", preparedUrl, username, type, pageNumber));
+                page.setTotalItems(countFollowers);
+                if (offset + config.getPageSize() < countFollowers) {
+                    page.setNext(String.format("%s%s/%s?page=%d", preparedUrl, username, type, pageNumber + 1));
+                }
+                if (pageNumber > 1) {
+                    page.setPrev(String.format("%s%s/%s?page=%d", preparedUrl, username, type, pageNumber - 1));
+                }
+                page.setPartOf(String.format("%s%s/%s", preparedUrl, username, type));
+                page.setOrderedItems(countFollowers > offset
+                    ? getFriends.get(dao, username, offset, config.getPageSize())
+                    : Collections.emptyList());
+
+                return page;
+            });
+        } catch (Exception e) {
+            LOGGER.error(String.format("Unable to find %s: '%s'", type, username));
+            throw new InternalServerErrorException();
+        }
+    }
+
+    @FunctionalInterface
+    interface CountFriends {
+        long count(ActorDao dao, String username);
+    }
+
+    @FunctionalInterface
+    interface GetFriends {
+        List<String> get(ActorDao dao, String username, long offset, long pageSize);
     }
 }

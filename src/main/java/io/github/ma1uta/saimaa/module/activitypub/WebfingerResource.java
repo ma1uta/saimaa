@@ -70,7 +70,7 @@ public class WebfingerResource {
                 asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
             } catch (Exception e) {
                 LOGGER.error(String.format("Failed to find the resource: '%s'", resource));
-                asyncResponse.resume(Response.serverError());
+                asyncResponse.resume(Response.serverError().build());
             }
         });
     }

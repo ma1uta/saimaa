@@ -24,9 +24,16 @@ import io.github.ma1uta.saimaa.config.Cert;
  */
 public class ActivityPubConfig {
 
+    /**
+     * Default page size in collections.
+     */
+    public static final long DEFAULT_PAGE_SIZE = 12L;
+
     private String url;
 
     private Cert ssl;
+
+    private long pageSize = DEFAULT_PAGE_SIZE;
 
     @JsonIgnore
     private String preparedUrl;
@@ -45,6 +52,14 @@ public class ActivityPubConfig {
 
     public void setSsl(Cert ssl) {
         this.ssl = ssl;
+    }
+
+    public long getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(long pageSize) {
+        this.pageSize = pageSize;
     }
 
     /**

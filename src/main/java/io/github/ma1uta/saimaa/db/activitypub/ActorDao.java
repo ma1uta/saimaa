@@ -88,11 +88,40 @@ public interface ActorDao {
     /**
      * Get followers.
      *
-     * @param roomId actor room.
-     * @param offset how many followers skip.
-     * @param limit  how many followers return.
+     * @param username actor username.
+     * @param offset   how many followers skip.
+     * @param limit    how many followers return.
      * @return followers.
      */
-    @SqlQuery("select * from ap_followers where room_id = :roomId order by added limit :limit offset :offset")
-    List<String> getFollowers(@Bind("roomId") String roomId, @Bind("offset") long offset, @Bind("limit") long limit);
+    @SqlQuery("select * from ap_followers where username = :username order by added limit :limit offset :offset")
+    List<String> getFollowers(@Bind("username") String username, @Bind("offset") long offset, @Bind("limit") long limit);
+
+    /**
+     * Count followers.
+     *
+     * @param username actor username.
+     * @return followers count.
+     */
+    @SqlQuery("select count(*) from ap_followers where username = :username")
+    long countFollowers(@Bind("username") String username);
+
+    /**
+     * Get following.
+     *
+     * @param username actor username.
+     * @param offset   how many following skip.
+     * @param limit    how many following return.
+     * @return followers.
+     */
+    @SqlQuery("select * from ap_following where username = :username order by added limit :limit offset :offset")
+    List<String> getFollowing(@Bind("username") String username, @Bind("offset") long offset, @Bind("limit") long limit);
+
+    /**
+     * Count following.
+     *
+     * @param username actor username.
+     * @return following count.
+     */
+    @SqlQuery("select count(*) from ap_following where username = :username")
+    long countFollowing(@Bind("username") String username);
 }

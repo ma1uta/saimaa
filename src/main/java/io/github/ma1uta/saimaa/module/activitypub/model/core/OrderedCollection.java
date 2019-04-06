@@ -16,6 +16,8 @@
 
 package io.github.ma1uta.saimaa.module.activitypub.model.core;
 
+import java.util.List;
+
 /**
  * <a href="https://www.w3.org/TR/activitystreams-vocabulary/#dfn-orderedcollection">Ordered collection</a>.
  */
@@ -26,8 +28,18 @@ public class OrderedCollection extends Collection {
      */
     public static final String TYPE = "OrderedCollection";
 
+    private List<?> orderedItems;
+
     @Override
     public String getType() {
         return TYPE;
+    }
+
+    public List<?> getOrderedItems() {
+        return orderedItems;
+    }
+
+    public void setOrderedItems(List<?> orderedItems) {
+        this.orderedItems = orderedItems;
     }
 }

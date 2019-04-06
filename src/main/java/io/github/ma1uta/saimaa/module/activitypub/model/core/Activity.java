@@ -32,7 +32,7 @@ public class Activity extends Object {
     public static final String TYPE = "Activity";
 
     @JsonDeserialize(using = ObjectDeserializer.class)
-    private List<java.lang.Object> actor;
+    private List<?> actor;
 
     private Object object;
 
@@ -46,18 +46,18 @@ public class Activity extends Object {
     private java.lang.Object origin;
 
     @JsonDeserialize(using = ObjectDeserializer.class)
-    private List<java.lang.Object> instrument;
+    private List<?> instrument;
 
     @Override
     public String getType() {
         return TYPE;
     }
 
-    public List<java.lang.Object> getActor() {
+    public List<?> getActor() {
         return actor;
     }
 
-    public void setActor(List<java.lang.Object> actor) {
+    public void setActor(List<?> actor) {
         this.actor = actor;
     }
 
@@ -93,11 +93,11 @@ public class Activity extends Object {
         this.origin = origin;
     }
 
-    public List<java.lang.Object> getInstrument() {
+    public List<?> getInstrument() {
         return instrument;
     }
 
-    void setInstrument(List<java.lang.Object> instrument) {
+    void setInstrument(List<?> instrument) {
         this.instrument = instrument;
     }
 }

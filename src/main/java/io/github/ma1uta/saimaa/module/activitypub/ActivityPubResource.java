@@ -30,6 +30,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
@@ -114,23 +115,41 @@ public class ActivityPubResource {
      * Followers.
      *
      * @param username      Username.
+     * @param page          page number.
      * @param asyncResponse Asynchronous response.
      */
     @Path("/{username}/followers")
     @GET
-    public void getFollowers(@PathParam("username") String username, @Suspended AsyncResponse asyncResponse) {
-
+    public void getFollowers(@PathParam("username") String username, @QueryParam("page") String page,
+                             @Suspended AsyncResponse asyncResponse) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                asyncResponse.resume(actorService.getFollowers(username, page));
+            } catch (Exception e) {
+                LOGGER.error(String.format("Failed to get followers '%s', page '%s'", username, page), e);
+                asyncResponse.resume(Response.serverError().build());
+            }
+        });
     }
 
     /**
      * Following.
      *
      * @param username      Username.
+     * @param page          page number.
      * @param asyncResponse Asynchronous response.
      */
     @Path("/{username}/following")
     @GET
-    public void getFollowing(@PathParam("username") String username, @Suspended AsyncResponse asyncResponse) {
-
+    public void getFollowing(@PathParam("username") String username, @QueryParam("page") String page,
+                             @Suspended AsyncResponse asyncResponse) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                asyncResponse.resume(actorService.getFollowing(username, page));
+            } catch (Exception e) {
+                LOGGER.error(String.format("Failed to get followers '%s', page '%s'", username, page), e);
+                asyncResponse.resume(Response.serverError().build());
+            }
+        });
     }
 }

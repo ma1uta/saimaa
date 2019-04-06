@@ -82,7 +82,7 @@ public class Object extends Contextable {
     private String summary;
 
     @JsonDeserialize(using = ObjectDeserializer.class)
-    private List<java.lang.Object> tag;
+    private List<?> tag;
 
     private Instant updated;
 
@@ -90,16 +90,16 @@ public class Object extends Contextable {
     private java.lang.Object url;
 
     @JsonDeserialize(using = ObjectDeserializer.class)
-    private List<java.lang.Object> to;
+    private List<?> to;
 
     @JsonDeserialize(using = ObjectDeserializer.class)
-    private List<java.lang.Object> bto;
+    private List<?> bto;
 
     @JsonDeserialize(using = ObjectDeserializer.class)
-    private List<java.lang.Object> cc;
+    private List<?> cc;
 
     @JsonDeserialize(using = ObjectDeserializer.class)
-    private List<java.lang.Object> bcc;
+    private List<?> bcc;
 
     private String mediaType;
 
@@ -246,11 +246,11 @@ public class Object extends Contextable {
         this.summary = summary;
     }
 
-    public List<java.lang.Object> getTag() {
+    public List<?> getTag() {
         return tag;
     }
 
-    public void setTag(List<java.lang.Object> tag) {
+    public void setTag(List<?> tag) {
         this.tag = tag;
     }
 
@@ -270,35 +270,35 @@ public class Object extends Contextable {
         this.url = url;
     }
 
-    public List<java.lang.Object> getTo() {
+    public List<?> getTo() {
         return to;
     }
 
-    public void setTo(List<java.lang.Object> to) {
+    public void setTo(List<?> to) {
         this.to = to;
     }
 
-    public List<java.lang.Object> getBto() {
+    public List<?> getBto() {
         return bto;
     }
 
-    public void setBto(List<java.lang.Object> bto) {
+    public void setBto(List<?> bto) {
         this.bto = bto;
     }
 
-    public List<java.lang.Object> getCc() {
+    public List<?> getCc() {
         return cc;
     }
 
-    public void setCc(List<java.lang.Object> cc) {
+    public void setCc(List<?> cc) {
         this.cc = cc;
     }
 
-    public List<java.lang.Object> getBcc() {
+    public List<?> getBcc() {
         return bcc;
     }
 
-    public void setBcc(List<java.lang.Object> bcc) {
+    public void setBcc(List<?> bcc) {
         this.bcc = bcc;
     }
 
