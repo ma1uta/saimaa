@@ -28,7 +28,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import javax.inject.Inject;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotFoundException;
 
 /**
  * Webfinger service.
@@ -47,10 +49,13 @@ public class WebfingerService {
      *
      * @param resource actor name.
      * @return resource.
+     * @throws BadRequestException          when missing the 'acct:' prefix.
+     * @throws NotFoundException            when the specified resource doesn't exist.
+     * @throws InternalServerErrorException when cannot find the specified resource.
      */
-    public Object findResource(String resource) {
+    public Object findResource(String resource) throws BadRequestException, NotFoundException, InternalServerErrorException {
         if (!resource.startsWith("acct:")) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            throw new BadRequestException();
         }
 
         int delim = resource.indexOf(":");
@@ -60,7 +65,7 @@ public class WebfingerService {
             Actor actor = jdbi.inTransaction(h -> h.attach(ActorDao.class).findByUsername(actorName));
 
             if (actor == null) {
-                return Response.status(Response.Status.NOT_FOUND).build();
+                throw new NotFoundException();
             }
 
             Resource response = new Resource();
@@ -74,7 +79,11 @@ public class WebfingerService {
             return response;
         } catch (Exception e) {
             LOGGER.error(String.format("Unable to search resource: '%s'", resource), e);
-            return Response.serverError().build();
+            if (e instanceof NotFoundException) {
+                throw e;
+            } else {
+                throw new InternalServerErrorException(e);
+            }
         }
     }
 }

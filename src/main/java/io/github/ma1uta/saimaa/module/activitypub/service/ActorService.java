@@ -16,15 +16,12 @@
 
 package io.github.ma1uta.saimaa.module.activitypub.service;
 
-import io.github.ma1uta.saimaa.Loggers;
 import io.github.ma1uta.saimaa.db.activitypub.Actor;
 import io.github.ma1uta.saimaa.db.activitypub.ActorDao;
 import io.github.ma1uta.saimaa.module.activitypub.ActivityPubConfig;
 import io.github.ma1uta.saimaa.module.activitypub.model.actor.Group;
 import io.github.ma1uta.saimaa.module.activitypub.model.actor.Person;
 import org.jdbi.v3.core.Jdbi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import javax.inject.Inject;
@@ -35,8 +32,6 @@ import javax.ws.rs.NotFoundException;
  * Actor service.
  */
 public class ActorService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Loggers.AP_LOGGER);
 
     @Inject
     private Jdbi jdbi;
@@ -77,11 +72,10 @@ public class ActorService {
 
             return response;
         } catch (Exception e) {
-            LOGGER.error(String.format("Unable to find actor '%s'", username));
             if (e instanceof NotFoundException) {
                 throw e;
             } else {
-                throw new InternalServerErrorException();
+                throw new InternalServerErrorException(e);
             }
         }
     }

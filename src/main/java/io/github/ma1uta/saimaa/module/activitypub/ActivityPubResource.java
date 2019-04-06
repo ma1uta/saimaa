@@ -16,7 +16,10 @@
 
 package io.github.ma1uta.saimaa.module.activitypub;
 
+import io.github.ma1uta.saimaa.Loggers;
 import io.github.ma1uta.saimaa.module.activitypub.service.ActorService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
@@ -39,6 +42,8 @@ import javax.ws.rs.core.Response;
 @Produces( {"application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", "application/activity+json"})
 public class ActivityPubResource {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Loggers.AP_LOGGER);
+
     @Inject
     private ActorService actorService;
 
@@ -52,11 +57,18 @@ public class ActivityPubResource {
     @GET
     public void actor(@PathParam("username") String username, @Suspended AsyncResponse asyncResponse) {
         CompletableFuture.runAsync(() -> {
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(String.format("Find the actor: '%s'", username));
+            }
+
             try {
                 asyncResponse.resume(actorService.actorInfo(username));
             } catch (NotFoundException e) {
+                LOGGER.error("Not found.", e);
                 asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
             } catch (Exception e) {
+                LOGGER.error(String.format("Failed to find the actor: '%s'", username), e);
                 asyncResponse.resume(Response.serverError().build());
             }
         });

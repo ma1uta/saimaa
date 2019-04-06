@@ -16,22 +16,30 @@
 
 package io.github.ma1uta.saimaa.module.activitypub;
 
+import io.github.ma1uta.saimaa.Loggers;
 import io.github.ma1uta.saimaa.module.activitypub.service.WebfingerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.Response;
 
 /**
  * AP Web resource.
  */
 @Path("")
 public class WebfingerResource {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Loggers.AP_LOGGER);
 
     @Inject
     private WebfingerService service;
@@ -46,6 +54,24 @@ public class WebfingerResource {
     @GET
     @Produces("application/json")
     public void finger(@QueryParam("resource") String resource, @Suspended AsyncResponse asyncResponse) {
-        CompletableFuture.runAsync(() -> asyncResponse.resume(service.findResource(resource)));
+        CompletableFuture.runAsync(() -> {
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(String.format("Find the resource: '%s'", resource));
+            }
+
+            try {
+                asyncResponse.resume(service.findResource(resource));
+            } catch (BadRequestException e) {
+                LOGGER.error("Bad request.", e);
+                asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).build());
+            } catch (NotFoundException e) {
+                LOGGER.error("Not found.", e);
+                asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
+            } catch (Exception e) {
+                LOGGER.error(String.format("Failed to find the resource: '%s'", resource));
+                asyncResponse.resume(Response.serverError());
+            }
+        });
     }
 }
