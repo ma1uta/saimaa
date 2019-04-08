@@ -26,10 +26,12 @@ import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.saimaa.Loggers;
 import io.github.ma1uta.saimaa.RouterFactory;
 import io.github.ma1uta.saimaa.module.activitypub.ActivityPubConfig;
+import io.github.ma1uta.saimaa.module.activitypub.ActivityPubModule;
 import io.github.ma1uta.saimaa.module.activitypub.db.Actor;
 import io.github.ma1uta.saimaa.module.activitypub.db.ActorDao;
 import io.github.ma1uta.saimaa.module.activitypub.model.actor.Group;
 import io.github.ma1uta.saimaa.module.activitypub.model.actor.Person;
+import io.github.ma1uta.saimaa.module.activitypub.model.core.Object;
 import io.github.ma1uta.saimaa.module.activitypub.model.core.OrderedCollection;
 import io.github.ma1uta.saimaa.module.activitypub.model.core.OrderedCollectionPage;
 import org.jdbi.v3.core.Jdbi;
@@ -287,6 +289,28 @@ public class ActorService {
         RoomEventFilter filter = new RoomEventFilter();
         filter.setNotTypes(Collections.singletonList("*"));
         return filter;
+    }
+
+    /**
+     * Processing incoming message.
+     *
+     * @param username actor username.
+     * @param message  incoming message.
+     */
+    public void processIncomingMessage(String username, Object message) {
+
+        Actor actor = jdbi.inTransaction(h -> h.attach(ActorDao.class).findByUsername(username));
+
+        if (actor == null) {
+            throw new NotFoundException();
+        }
+
+        try {
+            routerFactory.process(ActivityPubModule.NAME, new IncomingMessage(actor, message));
+        } catch (Exception e) {
+            LOGGER.error(String.format("Unable to process incoming message: '%s'", username), e);
+            throw new InternalServerErrorException(e);
+        }
     }
 
     @FunctionalInterface

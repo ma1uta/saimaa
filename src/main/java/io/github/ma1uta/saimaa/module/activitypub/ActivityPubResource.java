@@ -17,6 +17,7 @@
 package io.github.ma1uta.saimaa.module.activitypub;
 
 import io.github.ma1uta.saimaa.Loggers;
+import io.github.ma1uta.saimaa.module.activitypub.model.core.Object;
 import io.github.ma1uta.saimaa.module.activitypub.service.ActorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,24 +80,24 @@ public class ActivityPubResource {
      * Inbox.
      *
      * @param username      Username.
-     * @param asyncResponse Asynchronous response.
-     */
-    @Path("/{username}/inbox")
-    @GET
-    public void getInbox(@PathParam("username") String username, @Suspended AsyncResponse asyncResponse) {
-
-    }
-
-    /**
-     * Inbox.
-     *
-     * @param username      Username.
+     * @param object        Incoming message.
      * @param asyncResponse Asynchronous response.
      */
     @Path("/{username}/inbox")
     @POST
-    public void postInbox(@PathParam("username") String username, @Suspended AsyncResponse asyncResponse) {
-
+    public void postInbox(@PathParam("username") String username, Object object, @Suspended AsyncResponse asyncResponse) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                actorService.processIncomingMessage(username, object);
+                asyncResponse.resume(Response.ok("{}").build());
+            } catch (NotFoundException e) {
+                LOGGER.error(String.format("Actor '%s' doesn't exist", username), e);
+                asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
+            } catch (Exception e) {
+                LOGGER.error(String.format("Failed to process incoming message '%s'", username), e);
+                asyncResponse.resume(Response.serverError().build());
+            }
+        });
     }
 
     /**
