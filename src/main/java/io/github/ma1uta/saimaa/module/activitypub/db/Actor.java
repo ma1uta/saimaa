@@ -33,6 +33,10 @@ public class Actor {
 
     private String icon;
 
+    private String syncFilter;
+
+    private Long totalItems;
+
     public String getUsername() {
         return username;
     }
@@ -79,5 +83,21 @@ public class Actor {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+    public String getSyncFilter() {
+        return syncFilter;
+    }
+
+    public void setSyncFilter(String syncFilter) {
+        this.syncFilter = syncFilter;
+    }
+
+    public Long getTotalItems() {
+        return totalItems;
+    }
+
+    public void setTotalItems(Long totalItems) {
+        this.totalItems = totalItems;
     }
 }

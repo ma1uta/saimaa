@@ -124,4 +124,13 @@ public interface ActorDao {
      */
     @SqlQuery("select count(*) from ap_following where username = :username")
     long countFollowing(@Bind("username") String username);
+
+    /**
+     * Update sync filter.
+     *
+     * @param username actor username.
+     * @param filter   filter id.
+     */
+    @SqlUpdate("update ap_actor set sync_filter = :filter where username = :username")
+    void updateFilter(@Bind("username") String username, @Bind("filter") String filter);
 }

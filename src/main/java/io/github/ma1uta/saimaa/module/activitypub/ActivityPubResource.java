@@ -103,12 +103,30 @@ public class ActivityPubResource {
      * Outbox.
      *
      * @param username      Username.
+     * @param sync          enable or not paging.
+     * @param token         page token.
+     * @param dir           pagination direction.
      * @param asyncResponse Asynchronous response.
      */
     @Path("/{username}/outbox")
     @GET
-    public void getOutbox(@PathParam("username") String username, @Suspended AsyncResponse asyncResponse) {
-
+    public void getOutbox(
+        @PathParam("username") String username,
+        @QueryParam("sync") String sync,
+        @QueryParam("token") String token,
+        @QueryParam("dir") String dir,
+        @Suspended AsyncResponse asyncResponse) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                asyncResponse.resume(actorService.outbox(username, sync, token, dir));
+            } catch (NotFoundException e) {
+                LOGGER.error(String.format("Actor '%s' doesn't exist", username), e);
+                asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
+            } catch (Exception e) {
+                LOGGER.error(String.format("Failed to get outbox '%s' sync: '%s', token: '%s', dir: '%s'", username, sync, token, dir), e);
+                asyncResponse.resume(Response.serverError().build());
+            }
+        });
     }
 
     /**

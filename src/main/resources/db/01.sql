@@ -12,14 +12,15 @@ CREATE TABLE "transaction"
 );
 
 -- activity pub
-CREATE TABLE "ap_user"
+CREATE TABLE "ap_actor"
 (
-    "room_id"  TEXT PRIMARY KEY,
-    "mxid"     TEXT,
-    "username" TEXT,
-    "name"     TEXT,
-    "group"    BOOLEAN,
-    "icon"     TEXT
+    "room_id"     TEXT PRIMARY KEY,
+    "mxid"        TEXT,
+    "username"    TEXT,
+    "name"        TEXT,
+    "group"       BOOLEAN,
+    "icon"        TEXT,
+    "sync_filter" TEXT
 );
 
 CREATE TABLE "ap_followers"

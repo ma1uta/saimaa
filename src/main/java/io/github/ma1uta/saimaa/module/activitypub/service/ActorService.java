@@ -16,7 +16,13 @@
 
 package io.github.ma1uta.saimaa.module.activitypub.service;
 
+import io.github.ma1uta.matrix.Page;
 import io.github.ma1uta.matrix.client.AppServiceClient;
+import io.github.ma1uta.matrix.client.model.filter.FilterData;
+import io.github.ma1uta.matrix.client.model.filter.RoomEventFilter;
+import io.github.ma1uta.matrix.client.model.filter.RoomFilter;
+import io.github.ma1uta.matrix.client.model.sync.Timeline;
+import io.github.ma1uta.matrix.event.Event;
 import io.github.ma1uta.saimaa.Loggers;
 import io.github.ma1uta.saimaa.RouterFactory;
 import io.github.ma1uta.saimaa.module.activitypub.ActivityPubConfig;
@@ -188,12 +194,99 @@ public class ActorService {
     /**
      * Get outbox.
      *
-     * @param username      actor username.
-     * @param pageNumberStr page number.
+     * @param username actor username.
+     * @param sync     extract messages from history.
+     * @param token    token to search messages.
+     * @param dir      search direction.
      * @return outbox.
+     * @throws NotFoundException            when specified actor wasn't find.
+     * @throws InternalServerErrorException when cannot get actor outbox.
      */
-    public OrderedCollection outbox(String username, String pageNumberStr) {
-        return null;
+    public OrderedCollection outbox(String username, String sync, String token, String dir) throws NotFoundException,
+        InternalServerErrorException {
+        try {
+            return jdbi.inTransaction(h -> {
+                ActorDao dao = h.attach(ActorDao.class);
+                Actor actor = dao.findByUsername(username);
+
+                if (actor == null) {
+                    throw new NotFoundException();
+                }
+
+                String preparedUrl = config.getPreparedUrl();
+
+                OrderedCollectionPage page = new OrderedCollectionPage();
+                page.setProcessingContext(ACTIVITY_STREAMS);
+                page.setTotalItems(actor.getTotalItems());
+
+                if (sync == null) {
+                    page.setId(String.format("%s%s/%s", preparedUrl, username, "outbox"));
+                    page.setFirst(String.format("%s%s/%s?sync=true", preparedUrl, username, "outbox"));
+                    page.setLast("");
+                    return page;
+                }
+
+                String filter = getSyncFilter(actor, dao);
+
+                String currentToken = token;
+                String nextToken;
+                String prevToken = null;
+                if (currentToken == null) {
+                    Timeline history = mxClient.sync().sync(filter, null, false, null, 0L).join().getRooms().getJoin()
+                        .get(actor.getRoomId()).getTimeline();
+                    currentToken = history.getPrevBatch();
+                    nextToken = currentToken;
+                } else {
+                    Page<Event> eventPage = mxClient.event()
+                        .messages(actor.getRoomId(), currentToken, null, dir, (int) config.getPageSize(), filter).join();
+                    nextToken = "b".equals(dir) ? eventPage.getEnd() : eventPage.getStart();
+                    prevToken = token;
+                }
+
+                page.setId(String.format("%s%s/%s?sync=true&token=%s&dir=%s", preparedUrl, username, "outbox", currentToken, dir));
+                page.setNext(String.format("%s%s/%s?sync=true&token=%s&dir=%s", preparedUrl, username, "outbox", nextToken, dir));
+                if (prevToken != null) {
+                    page.setPrev(String.format("%s%s/%s?sync=true&token=%s&dir=%s", preparedUrl, username, "outbox", currentToken,
+                        "b".equals(dir) ? "f" : "b"));
+                }
+
+                return page;
+            });
+        } catch (Exception e) {
+            LOGGER.error(String.format("Unable to get outbox: '%s'", username), e);
+            if (e instanceof NotFoundException) {
+                throw e;
+            } else {
+                throw new InternalServerErrorException(e);
+            }
+        }
+    }
+
+    private String getSyncFilter(Actor actor, ActorDao dao) {
+        String filter = actor.getSyncFilter();
+        if (filter == null) {
+
+            RoomFilter roomFilter = new RoomFilter();
+            roomFilter.setRooms(Collections.singletonList(actor.getRoomId()));
+
+            roomFilter.setEphemeral(excludeAllFilter());
+            roomFilter.setState(excludeAllFilter());
+            roomFilter.setAccountData(excludeAllFilter());
+
+            FilterData filterData = new FilterData();
+            filterData.setRoom(roomFilter);
+
+            filter = mxClient.userId(actor.getMxid()).filter().uploadFilter(filterData).join().getFilterId();
+            actor.setSyncFilter(filter);
+            dao.updateFilter(actor.getUsername(), filter);
+        }
+        return filter;
+    }
+
+    private RoomEventFilter excludeAllFilter() {
+        RoomEventFilter filter = new RoomEventFilter();
+        filter.setNotTypes(Collections.singletonList("*"));
+        return filter;
     }
 
     @FunctionalInterface
